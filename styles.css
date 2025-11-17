@@ -1,0 +1,379 @@
+html {
+  scroll-behavior: smooth;
+}
+
+/* ---------------------------- */
+/* GLOBAL COLORS & VARIABLES    */
+/* ---------------------------- */
+:root {
+  --dark: #232323;
+  --white: #ffffff;
+  --light-grey: #b0b0b0;
+  --off-white: rgba(255, 255, 255, 0.85);
+  --white-overlay: rgba(255, 255, 255, 0.1);
+}
+
+/* ---------------------------- */
+/* GLOBAL RESET                 */
+/* ---------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', Arial, sans-serif;
+}
+
+body {
+  background: var(--dark) url('assets/background.png') repeat;
+  background-size: auto; /* no scaling */
+  color: var(--white);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+
+
+/* ---------------------------- */
+/* GLOBAL SECTIONS              */
+/* ---------------------------- */
+section {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: auto;
+  scroll-margin-top: 120px; /* adjust if your nav height changes */
+}
+
+/* ---------------------------- */
+/* CONTAINERS                   */
+/* ---------------------------- */
+.card {
+  background: var(--off-white);
+  color: var(--dark);
+  padding: 30px;
+  border-radius: 4px;
+  backdrop-filter: blur(6px);
+}
+
+.card-dark {
+  background: var(--white-overlay);
+  color: var(--white);
+  padding: 30px;
+  border-radius: 4px;
+}
+
+/* ---------------------------- */
+/* HEADERS                      */
+/* ---------------------------- */
+h1, h2, h3 {
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+/* ---------------------------- */
+/* BUTTONS                      */
+/* ---------------------------- */
+button,
+.slide-btn {
+  background: rgba(35, 35, 35, 0.7);   /* dark grey with opacity */
+  color: var(--white);
+  border: 1px solid var(--light-grey); /* clean light-grey border */
+  padding: 12px 26px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: 0.2s ease;
+  text-decoration: none; /* for slide-btn (it's an <a>) */
+}
+
+button:hover,
+.slide-btn:hover {
+  background: rgba(35, 35, 35, 0.9);   /* slightly darker on hover */
+  border-color: var(--white);          /* brighter border for feedback */
+  color: var(--white);
+}
+
+/* ---------------------------- */
+/* FORMS                        */
+/* ---------------------------- */
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid var(--light-grey);
+  background: var(--white);
+  color: var(--dark);
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+textarea {
+  min-height: 120px;
+}
+
+/* ---------------------------- */
+/* NAVIGATION MENU              */
+/* ---------------------------- */
+
+nav {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);   /* darker + transparent */
+
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(10px);
+  z-index: 500;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li a {
+  color: var(--white);
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  transition: 0.2s ease;
+}
+
+.nav-links li a:hover {
+  border-bottom: 2px solid var(--light-grey);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .nav-links {
+    gap: 20px;
+  }
+
+  .nav-links li a {
+    font-size: 16px;
+  }
+}
+
+
+
+/* ---------------------------- */
+/* LOGO HEADER                  */
+/* ---------------------------- */
+.logo-header {
+  width: 100%;
+  padding: 40px 0 50px 0;
+  text-align: center;
+  position: relative;
+  z-index: 999;
+}
+
+.logo-header img {
+  width: 620px;
+  max-width: 95%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 0 6px rgba(0,0,0,0.7));
+}
+
+@media (max-width: 600px) {
+  .logo-header img {
+    width: 280px;
+  }
+}
+
+/* ---------------------------- */
+/* WELCOME SECTION (side-by-side)  */
+/* ---------------------------- */
+
+.welcome-section h2 {
+  color: var(--white);
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.welcome-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+/* The card on the left — matches QUOTE/CONTACT exactly */
+.welcome-card {
+  flex: 1 1 420px;
+  background: var(--off-white);
+  color: var(--dark);
+  padding: 30px;
+  border-radius: 4px;
+  backdrop-filter: blur(6px);
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+/* The two images on the right */
+.welcome-images {
+  flex: 1 1 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.welcome-images img {
+  width: 100%;
+  border-radius: 6px;
+  object-fit: cover;
+  filter: brightness(0.92);
+  transition: 0.2s ease;
+}
+
+.welcome-images img:hover {
+  filter: brightness(1);
+}
+
+/* Mobile */
+@media (max-width: 800px) {
+  .welcome-container {
+    flex-direction: column;
+  }
+}
+
+/* ---------------------------- */
+/* WELCOME SECTION – MOBILE FIX */
+/* ---------------------------- */
+@media (max-width: 600px) {
+
+  .welcome-card {
+    padding: 20px;        /* reduce large inner padding */
+  }
+
+  .welcome-field {
+    padding: 14px;        /* tighter inner box */
+  }
+
+  .welcome-section {
+    padding-top: 20px;    
+    padding-bottom: 20px;
+  }
+}
+
+
+
+
+
+/* --------------------------------------- */
+/* FADE SLIDER — TEXT LOWERED              */
+/* --------------------------------------- */
+
+.fade-slider {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.fade-slide {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.fade-slide.active {
+  opacity: 1;
+}
+
+.fade-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.75);
+  z-index: 0;
+}
+
+/* DARK OVERLAY */
+.slide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
+
+/* TEXT BLOCK — LOWER ON THE IMAGE */
+.slide-content {
+  position: absolute;
+  bottom: 60px;              /* ← places text lower */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 700px;
+  text-align: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+  z-index: 2;
+}
+
+.fade-slide.active .slide-content {
+  opacity: 1;
+}
+
+.slide-content h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.6);
+}
+
+.slide-content p {
+  font-size: 20px;
+  margin-bottom: 18px;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+
+/* --------------------------------------- */
+/* MOBILE — STILL LOWERED BUT SAFE SPACING */
+/* --------------------------------------- */
+@media (max-width: 600px) {
+
+  .fade-slider {
+    height: 300px;
+  }
+
+  .slide-content {
+    bottom: 40px;        /* lifted slightly for small screens */
+    width: 95%;
+    max-width: none;
+  }
+
+  .slide-content h2 {
+    font-size: 20px;
+  }
+
+  .slide-content p {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .slide-btn {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+}
+
+
+
+
+

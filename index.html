@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milwaukee T-Shirt Co.</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<!-- LOGO -->
+<div class="logo-header">
+    <img src="assets/logos/MTC.svg" alt="Milwaukee T-Shirt Co.">
+</div>
+
+<!-- NAVIGATION -->
+<nav>
+    <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#quote">Get a Quote</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+</nav>
+
+
+
+<!-- SLIDER -->
+<div class="fade-slider">
+
+    <div class="fade-slide active">
+        <img src="assets/slider/slider1.jpg" alt="">
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+            <h2>Premium Local Screen Printing</h2>
+            <p>Fast turnaround. No hidden fees. High quality garments.</p>
+            <a href="#quote" class="slide-btn">Get a Quote</a>
+        </div>
+    </div>
+
+    <div class="fade-slide">
+        <img src="assets/slider/slider2.jpg" alt="">
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+            <h2>Custom Shirts Made Easy</h2>
+            <p>Perfect for teams, events, and small businesses.</p>
+            <a href="#quote" class="slide-btn">Start Your Order</a>
+        </div>
+    </div>
+
+    <div class="fade-slide">
+        <img src="assets/slider/slider3.jpg" alt="">
+        <div class="slide-overlay"></div>
+        <div class="slide-content">
+            <h2>Real Local Service</h2>
+            <p>Family-run Milwaukee print shop since 2013.</p>
+            <a href="#quote" class="slide-btn">Contact Us</a>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<!-- WELCOME SECTION -->
+<section id="welcome" class="welcome-section">
+
+    <h2>Welcome to Milwaukee T-Shirt Co.</h2>
+
+    <div class="welcome-container">
+
+        <!-- LEFT SIDE: The card -->
+        <div class="card welcome-card">
+            <p>
+                We’re a local, family-run print shop specializing in high-quality custom apparel 
+                for teams, schools, small businesses, and events of every size. Whether you need 
+                12 shirts or 1,200, we make the process fast, simple, and hands-on from your 
+                first message to your final delivery.
+            </p>
+        </div>
+
+        <!-- RIGHT SIDE: Two product images -->
+        <div class="welcome-images">
+            <img src="assets/product/CUMC.jpg" alt="White CUMC shirt product image">
+            <img src="assets/product/tip-top-hat.jpg" alt="Tip top hat embroidery product image">
+        </div>
+
+    </div>
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- QUOTE FORM -->
+<section id="quote">
+    <h2>Request a Quote</h2>
+    <div class="card">
+        <form id="quoteForm">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="email" name="email" placeholder="Your Email" required>
+            <textarea name="details" placeholder="Tell us about your project"></textarea>
+            <button type="submit">Submit Quote Request</button>
+        </form>
+    </div>
+</section>
+
+<!-- CONTACT FORM -->
+<section id="contact">
+    <h2>Contact Us</h2>
+    <div class="card">
+        <form id="contactForm">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="email" name="email" placeholder="Your Email" required>
+            <textarea name="message" placeholder="Your Message"></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+    </div>
+</section>
+
+<script src="script.js"></script>
+
+</body>
+</html>
