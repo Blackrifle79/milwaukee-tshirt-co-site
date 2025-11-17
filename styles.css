@@ -50,7 +50,7 @@ section {
   background: var(--off-white);
   color: var(--dark);
   padding: 30px;
-  border-radius: 4px;
+  border: 0px;
   backdrop-filter: blur(6px);
 }
 
@@ -58,7 +58,7 @@ section {
   background: var(--white-overlay);
   color: var(--white);
   padding: 30px;
-  border-radius: 4px;
+  border-radius: 0px;
 }
 
 /* ---------------------------- */
@@ -81,7 +81,7 @@ button,
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
-  border-radius: 4px;
+  border-radius: 0px;
   transition: 0.2s ease;
   text-decoration: none; /* for slide-btn (it's an <a>) */
 }
@@ -103,7 +103,7 @@ input, textarea, select {
   border: 1px solid var(--light-grey);
   background: var(--white);
   color: var(--dark);
-  border-radius: 4px;
+  border-radius: 0px;
   font-size: 16px;
 }
 
@@ -213,7 +213,7 @@ nav {
   background: var(--off-white);
   color: var(--dark);
   padding: 30px;
-  border-radius: 4px;
+  border-radius: 0px;
   backdrop-filter: blur(6px);
   font-size: 18px;
   line-height: 1.7;
@@ -229,7 +229,7 @@ nav {
 
 .welcome-images img {
   width: 100%;
-  border-radius: 6px;
+  border-radius: 0px;
   object-fit: cover;
   filter: brightness(0.92);
   transition: 0.2s ease;
