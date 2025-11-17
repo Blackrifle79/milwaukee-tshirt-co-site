@@ -99,8 +99,20 @@
       <label>Phone Number</label>
       <input type="text" id="phone" />
 
+      <!-- NEW GARMENT TYPE DROPDOWN -->
       <label>Garment Type</label>
-      <input type="text" id="garment_type" required placeholder="Example: Gildan 5000, Bella 3001" />
+      <select id="garment_type" required>
+        <option value="">Loading garment types...</option>
+      </select>
+
+      <!-- QUALITY DROPDOWN -->
+      <label>Garment Quality</label>
+      <select id="quality" required>
+        <option value="">Select quality...</option>
+        <option value="budget">Budget</option>
+        <option value="standard">Standard</option>
+        <option value="premium">Premium</option>
+      </select>
 
       <label>Number of Print Colors</label>
       <input type="number" id="colors" required min="1" />
@@ -124,6 +136,7 @@
     <p id="quoteStatus" style="margin-top:10px;"></p>
   </div>
 </section>
+
 
 <!-- CONTACT -->
 <section id="contact">

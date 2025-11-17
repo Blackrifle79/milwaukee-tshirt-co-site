@@ -9,16 +9,16 @@ const db = createClient(
 
 // --- IMAGE SLIDER ---
 window.onload = function () {
-    let slideIndex = 0;
-    const slides = document.querySelectorAll('.fade-slide');
+  let slideIndex = 0;
+  const slides = document.querySelectorAll(".fade-slide");
 
-    function showNextSlide() {
-        slides[slideIndex].classList.remove('active');
-        slideIndex = (slideIndex + 1) % slides.length;
-        slides[slideIndex].classList.add('active');
-    }
+  function showNextSlide() {
+    slides[slideIndex].classList.remove("active");
+    slideIndex = (slideIndex + 1) % slides.length;
+    slides[slideIndex].classList.add("active");
+  }
 
-    setInterval(showNextSlide, 5000);
+  setInterval(showNextSlide, 5000);
 };
 
 
@@ -41,7 +41,7 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
 
   let art_url = null;
 
-  // Upload artwork
+  // --- ARTWORK UPLOAD ---
   if (fileInput.files.length > 0) {
     const file = fileInput.files[0];
     const filePath = `${Date.now()}_${file.name}`;
@@ -63,23 +63,36 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
     art_url = pub.publicUrl;
   }
 
-  // Insert into quotes table
-  const { error } = await db.from("quotes").insert({
-    name,
-    email,
-    phone,
-    garment_type,
-    colors,
-    quantity,
-    deadline,
-    instructions,
-    art_url
-  });
+
+  // --- INSERT INTO QUOTES TABLE & RETURN ROW (INCLUDES quote_number) ---
+  const { data: quoteRow, error } = await db
+    .from("quotes")
+    .insert({
+      name,
+      email,
+      phone,
+      garment_type,
+      colors,
+      quantity,
+      deadline,
+      instructions,
+      art_url
+    })
+    .select("*")
+    .single();   // return exactly one row
+
 
   if (error) {
     status.innerText = "Database error: " + error.message;
-  } else {
-    status.innerText = "Quote submitted successfully!";
-    document.getElementById("quoteForm").reset();
+    return;
   }
+
+  // Extract the assigned quote number
+  const quoteNumber = quoteRow.quote_number;
+  console.log("Assigned quote number:", quoteNumber);
+
+  status.innerText = `Quote submitted! Your quote number is #${quoteNumber}.`;
+
+  // Reset form
+  document.getElementById("quoteForm").reset();
 });
