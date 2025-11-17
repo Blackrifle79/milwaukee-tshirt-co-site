@@ -1,4 +1,4 @@
-// --- SUPABASE INIT (must come first) ---
+// --- SUPABASE INIT ---
 const { createClient } = supabase;
 
 const db = createClient(
@@ -22,6 +22,33 @@ window.onload = function () {
 };
 
 
+// --- LOAD GARMENT TYPES INTO DROPDOWN ---
+async function loadGarments() {
+  const dropdown = document.getElementById("garment_type");
+
+  dropdown.innerHTML = `<option>Loading garment types...</option>`;
+
+  const { data, error } = await db
+    .from("garment_catalog")
+    .select("name")
+    .eq("active", true);
+
+  if (error) {
+    dropdown.innerHTML = `<option>Error loading types</option>`;
+    return;
+  }
+
+  // Get unique garment names only
+  const uniqueNames = [...new Set(data.map(row => row.name))];
+
+  dropdown.innerHTML = uniqueNames
+    .map(name => `<option value="${name}">${name}</option>`)
+    .join("");
+}
+
+loadGarments();
+
+
 // --- QUOTE FORM SUBMISSION ---
 document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -33,6 +60,7 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   const email = document.getElementById("email").value;
   const phone = document.getElementById("phone").value;
   const garment_type = document.getElementById("garment_type").value;
+  const quality = document.getElementById("quality").value;
   const colors = parseInt(document.getElementById("colors").value);
   const quantity = parseInt(document.getElementById("quantity").value);
   const deadline = document.getElementById("deadline").value;
@@ -64,7 +92,7 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   }
 
 
-  // --- INSERT INTO QUOTES TABLE & RETURN ROW (INCLUDES quote_number) ---
+  // --- INSERT ROW & RETURN IT ---
   const { data: quoteRow, error } = await db
     .from("quotes")
     .insert({
@@ -72,6 +100,7 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
       email,
       phone,
       garment_type,
+      quality,
       colors,
       quantity,
       deadline,
@@ -79,20 +108,17 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
       art_url
     })
     .select("*")
-    .single();   // return exactly one row
-
+    .single();
 
   if (error) {
     status.innerText = "Database error: " + error.message;
     return;
   }
 
-  // Extract the assigned quote number
+  // Extract assigned quote number
   const quoteNumber = quoteRow.quote_number;
-  console.log("Assigned quote number:", quoteNumber);
 
   status.innerText = `Quote submitted! Your quote number is #${quoteNumber}.`;
 
-  // Reset form
   document.getElementById("quoteForm").reset();
 });
