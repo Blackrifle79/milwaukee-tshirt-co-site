@@ -23,8 +23,6 @@
     </ul>
 </nav>
 
-
-
 <!-- SLIDER -->
 <div class="fade-slider">
 
@@ -60,9 +58,6 @@
 
 </div>
 
-
-
-
 <!-- WELCOME SECTION -->
 <section id="welcome" class="welcome-section">
 
@@ -70,7 +65,6 @@
 
     <div class="welcome-container">
 
-        <!-- LEFT SIDE: The card -->
         <div class="card welcome-card">
             <p>
                 We’re a local, family-run print shop specializing in high-quality custom apparel 
@@ -80,38 +74,58 @@
             </p>
         </div>
 
-        <!-- RIGHT SIDE: Two product images -->
         <div class="welcome-images">
-            <img src="assets/product/CUMC.jpg" alt="White CUMC shirt product image">
-            <img src="assets/product/tip-top-hat.jpg" alt="Tip top hat embroidery product image">
+            <img src="assets/product/CUMC.jpg" alt="">
+            <img src="assets/product/tip-top-hat.jpg" alt="">
         </div>
 
     </div>
 
 </section>
 
-
-
-
-
-
-
-
-
 <!-- QUOTE FORM -->
 <section id="quote">
-    <h2>Request a Quote</h2>
-    <div class="card">
-        <form id="quoteForm">
-            <input type="text" name="name" placeholder="Your Name" required>
-            <input type="email" name="email" placeholder="Your Email" required>
-            <textarea name="details" placeholder="Tell us about your project"></textarea>
-            <button type="submit">Submit Quote Request</button>
-        </form>
-    </div>
+  <h2>Get a Quick Quote</h2>
+
+  <div class="card">
+    <form id="quoteForm">
+
+      <label>Full Name</label>
+      <input type="text" id="name" required />
+
+      <label>Email Address</label>
+      <input type="email" id="email" required />
+
+      <label>Phone Number</label>
+      <input type="text" id="phone" />
+
+      <label>Garment Type</label>
+      <input type="text" id="garment_type" required placeholder="Example: Gildan 5000, Bella 3001" />
+
+      <label>Number of Print Colors</label>
+      <input type="number" id="colors" required min="1" />
+
+      <label>Quantity Needed</label>
+      <input type="number" id="quantity" required min="1" />
+
+      <label>Deadline (Optional)</label>
+      <input type="date" id="deadline" />
+
+      <label>Special Instructions</label>
+      <textarea id="instructions"></textarea>
+
+      <label>Upload Artwork (Optional)</label>
+      <input type="file" id="artfile" accept="image/*,.pdf" />
+
+      <button type="submit">Submit Quote Request</button>
+
+    </form>
+
+    <p id="quoteStatus" style="margin-top:10px;"></p>
+  </div>
 </section>
 
-<!-- CONTACT FORM -->
+<!-- CONTACT -->
 <section id="contact">
     <h2>Contact Us</h2>
     <div class="card">
@@ -124,6 +138,10 @@
     </div>
 </section>
 
+<!-- Load Supabase FIRST -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Then your app logic -->
 <script src="script.js"></script>
 
 </body>

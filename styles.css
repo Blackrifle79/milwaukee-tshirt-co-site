@@ -2,9 +2,9 @@ html {
   scroll-behavior: smooth;
 }
 
-/* ---------------------------- */
-/* GLOBAL COLORS & VARIABLES    */
-/* ---------------------------- */
+/* =================================================================== */
+/* GLOBAL COLORS & VARIABLES                                           */
+/* =================================================================== */
 :root {
   --dark: #232323;
   --white: #ffffff;
@@ -13,9 +13,9 @@ html {
   --white-overlay: rgba(255, 255, 255, 0.1);
 }
 
-/* ---------------------------- */
-/* GLOBAL RESET                 */
-/* ---------------------------- */
+/* =================================================================== */
+/* GLOBAL RESET                                                        */
+/* =================================================================== */
 * {
   margin: 0;
   padding: 0;
@@ -25,32 +25,30 @@ html {
 
 body {
   background: var(--dark) url('assets/background.png') repeat;
-  background-size: auto; /* no scaling */
+  background-size: auto;
   color: var(--white);
   line-height: 1.5;
   overflow-x: hidden;
 }
 
-
-
-/* ---------------------------- */
-/* GLOBAL SECTIONS              */
-/* ---------------------------- */
+/* =================================================================== */
+/* GLOBAL SECTIONS                                                     */
+/* =================================================================== */
 section {
   padding: 60px 20px;
   max-width: 1200px;
   margin: auto;
-  scroll-margin-top: 120px; /* adjust if your nav height changes */
+  scroll-margin-top: 120px;
 }
 
-/* ---------------------------- */
-/* CONTAINERS                   */
-/* ---------------------------- */
+/* =================================================================== */
+/* GLOBAL CONTAINERS                                                   */
+/* =================================================================== */
 .card {
   background: var(--off-white);
   color: var(--dark);
   padding: 30px;
-  border: 0px;
+  border: 0;
   backdrop-filter: blur(6px);
 }
 
@@ -58,44 +56,44 @@ section {
   background: var(--white-overlay);
   color: var(--white);
   padding: 30px;
-  border-radius: 0px;
+  border-radius: 0;
 }
 
-/* ---------------------------- */
-/* HEADERS                      */
-/* ---------------------------- */
+/* =================================================================== */
+/* HEADINGS                                                            */
+/* =================================================================== */
 h1, h2, h3 {
   margin-bottom: 20px;
   font-weight: 600;
 }
 
-/* ---------------------------- */
-/* BUTTONS                      */
-/* ---------------------------- */
+/* =================================================================== */
+/* BUTTONS                                                             */
+/* =================================================================== */
 button,
 .slide-btn {
-  background: rgba(35, 35, 35, 0.7);   /* dark grey with opacity */
+  background: rgba(35, 35, 35, 0.7);
   color: var(--white);
-  border: 1px solid var(--light-grey); /* clean light-grey border */
+  border: 1px solid var(--light-grey);
   padding: 12px 26px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
-  border-radius: 0px;
+  border-radius: 0;
   transition: 0.2s ease;
-  text-decoration: none; /* for slide-btn (it's an <a>) */
+  text-decoration: none;
 }
 
 button:hover,
 .slide-btn:hover {
-  background: rgba(35, 35, 35, 0.9);   /* slightly darker on hover */
-  border-color: var(--white);          /* brighter border for feedback */
+  background: rgba(35, 35, 35, 0.9);
+  border-color: var(--white);
   color: var(--white);
 }
 
-/* ---------------------------- */
-/* FORMS                        */
-/* ---------------------------- */
+/* =================================================================== */
+/* FORM ELEMENTS                                                       */
+/* =================================================================== */
 input, textarea, select {
   width: 100%;
   padding: 12px;
@@ -103,7 +101,7 @@ input, textarea, select {
   border: 1px solid var(--light-grey);
   background: var(--white);
   color: var(--dark);
-  border-radius: 0px;
+  border-radius: 0;
   font-size: 16px;
 }
 
@@ -111,14 +109,12 @@ textarea {
   min-height: 120px;
 }
 
-/* ---------------------------- */
-/* NAVIGATION MENU              */
-/* ---------------------------- */
-
+/* =================================================================== */
+/* NAVIGATION BAR                                                      */
+/* =================================================================== */
 nav {
   width: 100%;
-  background: rgba(0, 0, 0, 0.35);   /* darker + transparent */
-
+  background: rgba(0, 0, 0, 0.35);
   padding: 12px 0;
   position: sticky;
   top: 0;
@@ -131,8 +127,6 @@ nav {
   display: flex;
   justify-content: center;
   gap: 50px;
-  margin: 0;
-  padding: 0;
 }
 
 .nav-links li a {
@@ -149,7 +143,7 @@ nav {
   border-bottom: 2px solid var(--light-grey);
 }
 
-/* Mobile */
+/* Mobile Navigation */
 @media (max-width: 600px) {
   .nav-links {
     gap: 20px;
@@ -160,14 +154,12 @@ nav {
   }
 }
 
-
-
-/* ---------------------------- */
-/* LOGO HEADER                  */
-/* ---------------------------- */
+/* =================================================================== */
+/* LOGO HEADER                                                         */
+/* =================================================================== */
 .logo-header {
   width: 100%;
-  padding: 40px 0 50px 0;
+  padding: 40px 0 50px;
   text-align: center;
   position: relative;
   z-index: 999;
@@ -178,7 +170,7 @@ nav {
   max-width: 95%;
   height: auto;
   display: block;
-  margin: 0 auto;
+  margin: auto;
   filter: drop-shadow(0 0 6px rgba(0,0,0,0.7));
 }
 
@@ -188,10 +180,9 @@ nav {
   }
 }
 
-/* ---------------------------- */
-/* WELCOME SECTION (side-by-side)  */
-/* ---------------------------- */
-
+/* =================================================================== */
+/* WELCOME SECTION (Desktop: Side-by-Side)                             */
+/* =================================================================== */
 .welcome-section h2 {
   color: var(--white);
   font-size: 28px;
@@ -207,19 +198,18 @@ nav {
   flex-wrap: wrap;
 }
 
-/* The card on the left — matches QUOTE/CONTACT exactly */
+/* Left Card */
 .welcome-card {
   flex: 1 1 420px;
   background: var(--off-white);
   color: var(--dark);
   padding: 30px;
-  border-radius: 0px;
-  backdrop-filter: blur(6px);
   font-size: 18px;
   line-height: 1.7;
+  backdrop-filter: blur(6px);
 }
 
-/* The two images on the right */
+/* Right Images */
 .welcome-images {
   flex: 1 1 420px;
   display: flex;
@@ -229,50 +219,52 @@ nav {
 
 .welcome-images img {
   width: 100%;
-  border-radius: 0px;
+  border-radius: 0;
   object-fit: cover;
   filter: brightness(0.92);
-  transition: 0.2s ease;
+  transition: 0.2s;
 }
 
 .welcome-images img:hover {
   filter: brightness(1);
 }
 
-/* Mobile */
+/* =================================================================== */
+/* WELCOME SECTION — MOBILE CLEANUP                                    */
+/* =================================================================== */
 @media (max-width: 800px) {
   .welcome-container {
-    flex-direction: column;
+    display: block !important;  /* disable flex */
+  }
+
+  .welcome-card,
+  .welcome-images {
+    width: 100% !important;
+    flex: none !important;
+    height: auto !important;
+    margin-bottom: 20px !important;
   }
 }
 
-/* ---------------------------- */
-/* WELCOME SECTION – MOBILE FIX */
-/* ---------------------------- */
 @media (max-width: 600px) {
+  .welcome-section {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 
   .welcome-card {
-    padding: 20px;        /* reduce large inner padding */
+    padding: 14px !important;
   }
 
-  .welcome-field {
-    padding: 14px;        /* tighter inner box */
-  }
-
-  .welcome-section {
-    padding-top: 20px;    
-    padding-bottom: 20px;
+  .welcome-card p {
+    font-size: 15px !important;
+    line-height: 1.45 !important;
   }
 }
 
-
-
-
-
-/* --------------------------------------- */
-/* FADE SLIDER — TEXT LOWERED              */
-/* --------------------------------------- */
-
+/* =================================================================== */
+/* FADE SLIDER                                                        */
+/* =================================================================== */
 .fade-slider {
   position: relative;
   width: 100%;
@@ -286,7 +278,7 @@ nav {
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out;
+  transition: opacity 1.5s;
 }
 
 .fade-slide.active {
@@ -298,10 +290,9 @@ nav {
   height: 100%;
   object-fit: cover;
   filter: brightness(0.75);
-  z-index: 0;
 }
 
-/* DARK OVERLAY */
+/* Overlay */
 .slide-overlay {
   position: absolute;
   top: 0;
@@ -312,10 +303,10 @@ nav {
   z-index: 1;
 }
 
-/* TEXT BLOCK — LOWER ON THE IMAGE */
+/* Text Content */
 .slide-content {
   position: absolute;
-  bottom: 60px;              /* ← places text lower */
+  bottom: 60px;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
@@ -323,7 +314,7 @@ nav {
   text-align: center;
   color: white;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out;
+  transition: opacity 1.5s;
   z-index: 2;
 }
 
@@ -343,19 +334,15 @@ nav {
   text-shadow: 0 2px 6px rgba(0,0,0,0.6);
 }
 
-/* --------------------------------------- */
-/* MOBILE — STILL LOWERED BUT SAFE SPACING */
-/* --------------------------------------- */
+/* MOBILE SLIDER FIXES */
 @media (max-width: 600px) {
-
   .fade-slider {
     height: 300px;
   }
 
   .slide-content {
-    bottom: 40px;        /* lifted slightly for small screens */
+    bottom: 40px;
     width: 95%;
-    max-width: none;
   }
 
   .slide-content h2 {
@@ -372,8 +359,3 @@ nav {
     font-size: 14px;
   }
 }
-
-
-
-
-
