@@ -54,8 +54,9 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // 4. GENERATE QUOTE NUMBER
 // ------------------------------------------------------------
 function generateQuoteNumber() {
-  return "Q" + Date.now();
+  return Date.now();  // int only
 }
+
 
 
 // ------------------------------------------------------------
