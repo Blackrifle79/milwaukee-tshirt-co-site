@@ -16,7 +16,7 @@ window.onload = function () {
 
 
 // ------------------------------------------------------------
-// 2. SUPABASE INITIALIZATION (must load BEFORE queries)
+// 2. SUPABASE INITIALIZATION
 // ------------------------------------------------------------
 const SUPABASE_URL = "https://hrercslgttmmtbcjbgpz.supabase.co";
 const SUPABASE_KEY =
@@ -26,7 +26,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
 // ------------------------------------------------------------
-// 3. LOAD GARMENT TYPES (fully fixed)
+// 3. LOAD GARMENT TYPES
 // ------------------------------------------------------------
 async function loadGarments() {
   const dropdown = document.getElementById("garment_type");
@@ -34,7 +34,7 @@ async function loadGarments() {
 
   const { data, error } = await supabase
     .from("garment_catalog")
-    .select("name");
+    .select("name, active");
 
   if (error) {
     console.error("Garment load error:", error);
@@ -47,11 +47,15 @@ async function loadGarments() {
     return;
   }
 
-  const uniqueNames = [...new Set(data.map(row => row.name))];
+  // Only include active garments
+  const activeRows = data.filter(row => row.active === true);
 
-  dropdown.innerHTML = uniqueNames
-    .map(name => `<option value="${name}">${name}</option>`)
-    .join("");
+  const uniqueNames = [...new Set(activeRows.map(row => row.name))];
+
+  dropdown.innerHTML =
+    uniqueNames
+      .map(name => `<option value="${name}">${name}</option>`)
+      .join("");
 }
 
 
@@ -59,12 +63,12 @@ async function loadGarments() {
 // 4. GENERATE QUOTE NUMBER
 // ------------------------------------------------------------
 function generateQuoteNumber() {
-  return Date.now(); // integer only
+  return Date.now();
 }
 
 
 // ------------------------------------------------------------
-// 5. ENSURE EVERYTHING LOADS CORRECTLY
+// 5. ENSURE PAGE LOADS CORRECTLY
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   loadGarments();
@@ -72,16 +76,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // ------------------------------------------------------------
-// 6. QUOTE FORM SUBMISSION (fully fixed)
+// 6. QUOTE FORM SUBMISSION
 // ------------------------------------------------------------
 document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  e.stopPropagation();   // stops browser auto-post behavior
 
   const status = document.getElementById("quoteStatus");
   status.innerText = "Submitting… Please wait.";
 
-  // Collect fields
+  // Gather form values
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const phone = document.getElementById("phone").value.trim();
@@ -91,7 +94,6 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   const quantity = parseInt(document.getElementById("quantity").value);
   const deadline = document.getElementById("deadline").value || null;
   const instructions = document.getElementById("instructions").value.trim();
-
   const artFile = document.getElementById("artfile").files[0] || null;
 
   const quoteNumber = generateQuoteNumber();
@@ -123,8 +125,8 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   }
 
   // ------------------------------------------------------------
-  // 6B – INSERT QUOTE (correct column names)
-// ------------------------------------------------------------
+  // 6B – INSERT QUOTE
+  // ------------------------------------------------------------
   const { data, error } = await supabase
     .from("quotes")
     .insert([
@@ -139,7 +141,7 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         quantity,
         deadline,
         instructions,
-        artwork_url,  // ✔ correct column name
+        artwork_url,   // <-- correct column name
         created_at: new Date().toISOString()
       }
     ])
