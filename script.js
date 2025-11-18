@@ -130,7 +130,7 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         quantity,
         deadline: deadline || null,
         instructions,
-        artwork_url,
+        art_url: artwork_url,
         created_at: new Date().toISOString()
       }
     ])
