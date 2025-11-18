@@ -141,7 +141,8 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         quantity,
         deadline,
         instructions,
-        artwork_url,   // <-- correct column name
+        art_url: artwork_url,
+
         created_at: new Date().toISOString()
       }
     ])
