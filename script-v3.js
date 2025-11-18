@@ -1,5 +1,5 @@
 // ------------------------------------------------------------
-// 1. IMAGE SLIDER  (YOUR ORIGINAL CODE)
+// 1. IMAGE SLIDER
 // ------------------------------------------------------------
 window.onload = function () {
   let slideIndex = 0;
@@ -16,20 +16,34 @@ window.onload = function () {
 
 
 // ------------------------------------------------------------
-// 2. LOAD GARMENT TYPES (YOUR ORIGINAL CODE)
+// 2. SUPABASE INITIALIZATION (must load BEFORE queries)
+// ------------------------------------------------------------
+const SUPABASE_URL = "https://hrercslgttmmtbcjbgpz.supabase.co";
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZXJjc2xndHRtbXRiY2piZ3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTUxNTIsImV4cCI6MjA3ODk3MTE1Mn0.ajqkYr3snQFReGCKJQe53Qe_Aa6zeMmTKbn_TAQZ2CI";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+// ------------------------------------------------------------
+// 3. LOAD GARMENT TYPES (fully fixed)
 // ------------------------------------------------------------
 async function loadGarments() {
   const dropdown = document.getElementById("garment_type");
-
   dropdown.innerHTML = `<option>Loading garment types...</option>`;
 
   const { data, error } = await supabase
     .from("garment_catalog")
-    .select("name")
-    .eq("active", true);
+    .select("name");
 
   if (error) {
+    console.error("Garment load error:", error);
     dropdown.innerHTML = `<option>Error loading types</option>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    dropdown.innerHTML = `<option>No garments available</option>`;
     return;
   }
 
@@ -42,39 +56,32 @@ async function loadGarments() {
 
 
 // ------------------------------------------------------------
-// 3. SUPABASE INITIALIZATION (NEW VERSION)
-// ------------------------------------------------------------
-const SUPABASE_URL = "https://hrercslgttmmtbcjbgpz.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZXJjc2xndHRtbXRiY2piZ3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTUxNTIsImV4cCI6MjA3ODk3MTE1Mn0.ajqkYr3snQFReGCKJQe53Qe_Aa6zeMmTKbn_TAQZ2CI";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-// ------------------------------------------------------------
 // 4. GENERATE QUOTE NUMBER
 // ------------------------------------------------------------
 function generateQuoteNumber() {
-  return Date.now();  // int only
+  return Date.now(); // integer only
 }
 
 
+// ------------------------------------------------------------
+// 5. ENSURE EVERYTHING LOADS CORRECTLY
+// ------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  loadGarments();
+});
+
 
 // ------------------------------------------------------------
-// 5. ON PAGE LOAD
-// ------------------------------------------------------------
-loadGarments();
-
-
-// ------------------------------------------------------------
-// 6. QUOTE FORM SUBMISSION (NEW VERSION)
+// 6. QUOTE FORM SUBMISSION (fully fixed)
 // ------------------------------------------------------------
 document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+  e.stopPropagation();   // stops browser auto-post behavior
 
   const status = document.getElementById("quoteStatus");
   status.innerText = "Submitting… Please wait.";
 
-  // Collect form fields
+  // Collect fields
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const phone = document.getElementById("phone").value.trim();
@@ -82,15 +89,16 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   const quality = document.getElementById("quality").value;
   const colors = parseInt(document.getElementById("colors").value);
   const quantity = parseInt(document.getElementById("quantity").value);
-  const deadline = document.getElementById("deadline").value;
+  const deadline = document.getElementById("deadline").value || null;
   const instructions = document.getElementById("instructions").value.trim();
+
   const artFile = document.getElementById("artfile").files[0] || null;
 
   const quoteNumber = generateQuoteNumber();
   const folderPath = `quotes/${quoteNumber}`;
 
   // ------------------------------------------------------------
-  // 6A — ARTWORK UPLOAD
+  // 6A – ARTWORK UPLOAD
   // ------------------------------------------------------------
   let artwork_url = null;
 
@@ -102,22 +110,22 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
       .upload(uploadPath, artFile);
 
     if (uploadError) {
-      console.error(uploadError);
+      console.error("Upload error:", uploadError);
       status.innerText = "❌ Artwork upload failed.";
       return;
     }
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("quote-art").getPublicUrl(uploadPath);
+    const { data: pub } = supabase.storage
+      .from("quote-art")
+      .getPublicUrl(uploadPath);
 
-    artwork_url = publicUrl;
+    artwork_url = pub.publicUrl;
   }
 
   // ------------------------------------------------------------
-  // 6B — INSERT QUOTE INTO DATABASE
-  // ------------------------------------------------------------
-  const { data: inserted, error } = await supabase
+  // 6B – INSERT QUOTE (correct column names)
+// ------------------------------------------------------------
+  const { data, error } = await supabase
     .from("quotes")
     .insert([
       {
@@ -129,9 +137,9 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
         quality,
         colors,
         quantity,
-        deadline: deadline || null,
+        deadline,
         instructions,
-        art_url: artwork_url,
+        artwork_url,  // ✔ correct column name
         created_at: new Date().toISOString()
       }
     ])
@@ -139,14 +147,12 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
     .single();
 
   if (error) {
-    console.error(error);
+    console.error("Insert error:", error);
     status.innerText = "❌ Database error submitting your quote.";
     return;
   }
 
-  // ------------------------------------------------------------
   // SUCCESS
-  // ------------------------------------------------------------
   status.innerText = `✅ Quote submitted! Your quote number is ${quoteNumber}.`;
   document.getElementById("quoteForm").reset();
 });

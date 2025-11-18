@@ -88,26 +88,24 @@
   <h2>Get a Quick Quote</h2>
 
   <div class="card">
-    <form id="quoteForm">
+    <form id="quoteForm" autocomplete="off" enctype="multipart/form-data" onsubmit="return false;">
 
       <label>Full Name</label>
-      <input type="text" id="name" required />
+      <input type="text" id="name" name="full_name" required />
 
       <label>Email Address</label>
-      <input type="email" id="email" required />
+      <input type="email" id="email" name="email_address" required />
 
       <label>Phone Number</label>
-      <input type="text" id="phone" />
+      <input type="text" id="phone" name="phone_number" />
 
-      <!-- NEW GARMENT TYPE DROPDOWN -->
       <label>Garment Type</label>
-      <select id="garment_type" required>
+      <select id="garment_type" name="garment_type_safe" required>
         <option value="">Loading garment types...</option>
       </select>
 
-      <!-- QUALITY DROPDOWN -->
       <label>Garment Quality</label>
-      <select id="quality" required>
+      <select id="quality" name="garment_quality_safe" required>
         <option value="">Select quality...</option>
         <option value="budget">Budget</option>
         <option value="standard">Standard</option>
@@ -115,19 +113,19 @@
       </select>
 
       <label>Number of Print Colors</label>
-      <input type="number" id="colors" required min="1" />
+      <input type="number" id="colors" name="print_colors" required min="1" />
 
       <label>Quantity Needed</label>
-      <input type="number" id="quantity" required min="1" />
+      <input type="number" id="quantity" name="order_quantity" required min="1" />
 
       <label>Deadline (Optional)</label>
-      <input type="date" id="deadline" />
+      <input type="date" id="deadline" name="due_date" />
 
       <label>Special Instructions</label>
-      <textarea id="instructions"></textarea>
+      <textarea id="instructions" name="instructions_text"></textarea>
 
       <label>Upload Artwork (Optional)</label>
-      <input type="file" id="artfile" accept="image/*,.pdf" />
+      <input type="file" id="artfile" name="artfile" accept="image/*,.pdf" />
 
       <button type="submit">Submit Quote Request</button>
 
@@ -136,7 +134,6 @@
     <p id="quoteStatus" style="margin-top:10px;"></p>
   </div>
 </section>
-
 
 <!-- CONTACT -->
 <section id="contact">
@@ -155,7 +152,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- Then your app logic -->
-<script src="script.js"></script>
+<script src="script-v4.js"></script>
 
 </body>
 </html>
