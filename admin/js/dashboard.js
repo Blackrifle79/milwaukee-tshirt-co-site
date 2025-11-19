@@ -1,42 +1,55 @@
 async function loadDashboard() {
-    // 1. Wait until the initialized client is available
+    // Wait for Supabase client
     while (!window.client) {
         await new Promise(r => setTimeout(r, 10));
     }
 
-    // --- REMOVED: Database query for 'quotes' table ---
-
-    // Load ticket folders (storage)
-    const { data: tickets, error: tErr } = await window.client 
+    // Load root of bucket
+    const { data, error } = await window.client
         .storage
         .from("quotes_bucket")
-        .list("", { limit: 100 });
+        .list("", { limit: 1000, sortBy: { column: "name", order: "asc" } });
 
-    // Assuming your HTML now has a div with id="tickets"
     const ticketDiv = document.getElementById("tickets");
-    
-    // Safety check: ensure the element exists
+
     if (!ticketDiv) {
-        console.error("HTML element with id='tickets' not found.");
+        console.error("tickets div not found");
         return;
     }
-    
+
     ticketDiv.innerHTML = "<h2>Ticket Folders</h2>";
 
-    if (tErr) {
-        console.error("Storage error:", tErr);
-        ticketDiv.innerHTML += "<p>Error loading ticket folders. Check policies.</p>";
-    } else {
-        // Check if data is present and loop through it
-        if (tickets && tickets.length > 0) {
-            tickets.forEach(folder => {
-                // This displays the name of the file or folder
-                ticketDiv.innerHTML += `<div>${folder.name}</div>`;
-            });
-        } else {
-            ticketDiv.innerHTML += "<p>No files or folders found in the quotes_bucket root.</p>";
-        }
+    if (error) {
+        ticketDiv.innerHTML += "<p>Error loading ticket folders.</p>";
+        console.error("Storage error:", error);
+        return;
     }
+
+    // Filter folders ONLY
+    const folders = data.filter(item =>
+        item.type === "dir" ||
+        item.type === "folder" ||
+        item.type === "directory"
+    );
+
+    if (folders.length === 0) {
+        ticketDiv.innerHTML += "<p>No ticket folders found.</p>";
+        return;
+    }
+
+    let html = "<ul>";
+    folders.forEach(f => {
+        html += `
+            <li>
+                <a class="ticket-link" href="/admin/ticket.html?folder=${encodeURIComponent(f.name)}">
+                    ${f.name}
+                </a>
+            </li>
+        `;
+    });
+    html += "</ul>";
+
+    ticketDiv.innerHTML += html;
 }
 
-loadDashboard();
+document.addEventListener("DOMContentLoaded", loadDashboard);
