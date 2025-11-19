@@ -179,15 +179,15 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      const res = await fetch(
-        "https://hrercslgttmmtbcjbgpz.supabase.co/functions/v1/smart-endpoint",
+const res = await fetch(
+  "https://hrercslgttmmtbcjbgpz.supabase.co/functions/v1/contact-email",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }
+);
 
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        }
-      );
 
       if (res.ok) {
         alert("Message sent! Thank you.");
