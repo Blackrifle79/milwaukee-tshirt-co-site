@@ -45,17 +45,15 @@
 <script defer src="/admin/js/supabase.js"></script>
 <script defer src="/admin/js/auth.js"></script>
 
-<!-- DASHBOARD LOGIC (Inline, authoritative) -->
+<!-- DASHBOARD LOGIC -->
 <script>
 async function loadDashboard() {
-    // Wait until Supabase client is ready
     while (!window.client) {
         await new Promise(r => setTimeout(r, 10));
     }
 
     const bucket = "quotes_bucket";
 
-    // Fetch contents of bucket root
     const { data, error } = await window.client
         .storage
         .from(bucket)
@@ -72,12 +70,8 @@ async function loadDashboard() {
         return;
     }
 
-    // Filter ONLY directories
-    const folders = data.filter(item =>
-        item.type === "dir" ||
-        item.type === "folder" ||
-        item.type === "directory"
-    );
+    // ✅ FIXED: FOLDERS ARE IDENTIFIED BY `id === null`
+    const folders = data.filter(item => item.id === null);
 
     if (folders.length === 0) {
         ticketDiv.innerHTML = "<p>No tickets found.</p>";
@@ -99,7 +93,6 @@ async function loadDashboard() {
     ticketDiv.innerHTML = html;
 }
 
-// Initialize dashboard
 document.addEventListener("DOMContentLoaded", loadDashboard);
 </script>
 
