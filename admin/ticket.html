@@ -9,21 +9,45 @@
         body {
             background: var(--dark) url('/assets/background.png') repeat !important;
             color: white;
-            padding: 20px;
-            padding-bottom: 90px; /* Prevents content hiding behind action bar */
+            padding: 30px;
+            padding-bottom: 110px; /* Room for bottom bar */
+            font-family: sans-serif;
         }
 
-        .section {
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 6px;
+        .page-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
             margin-bottom: 25px;
+            font-size: 32px;
+            color: #ffffff;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.06);
+            padding: 22px;
+            border-radius: 8px;
+            margin-bottom: 28px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.25);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 22px;
+            color: #8fe3ff;
         }
 
         .field-row {
-            margin-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 5px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .field-label {
@@ -34,25 +58,37 @@
         .file-link {
             color: #ffd27f;
             text-decoration: none;
+            font-size: 15px;
         }
         .file-link:hover {
             text-decoration: underline;
         }
 
-        /* ----------------------------- */
-        /*  STICKY ACTION BAR            */
-        /* ----------------------------- */
+        .delete-btn {
+            background: #BA3B46;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .delete-btn:hover {
+            background: #d44752;
+        }
+
+        /* Sticky action bar */
         .ticket-action-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(0,0,0,0.55);
+            background: rgba(0,0,0,0.65);
             backdrop-filter: blur(6px);
-            border-top: 1px solid rgba(255,255,255,0.18);
-            padding: 12px 18px;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            padding: 14px 20px;
             display: flex;
-            gap: 12px;
+            gap: 16px;
             justify-content: center;
             z-index: 9999;
         }
@@ -61,36 +97,36 @@
             background: rgba(255,255,255,0.85);
             color: var(--dark);
             border: 1px solid var(--light-grey);
-            padding: 12px 20px;
+            padding: 12px 22px;
             font-size: 16px;
             font-weight: 600;
-            border-radius: 0;
+            border-radius: 4px;
             cursor: pointer;
-            transition: 0.2s ease;
         }
-
         .ticket-action-bar button:hover {
             background: white;
-            border-color: white;
         }
     </style>
 </head>
 
 <body>
+<div class="page-container">
 
-<h1>Ticket Details</h1>
+    <h1>Ticket Details</h1>
 
-<div id="formData" class="section"></div>
+    <div id="formData" class="card"></div>
 
-<h2>Uploaded Files</h2>
-<div id="fileList" class="section"></div>
+    <div class="card">
+        <h2>Uploaded Files</h2>
+        <div id="fileList"></div>
+    </div>
 
-<!-- Hidden file picker for uploads -->
+</div>
+
+<!-- Hidden file picker -->
 <input type="file" id="filePicker" style="display:none;" />
 
-<!-- ============================ -->
-<!-- STICKY BOTTOM ACTION BAR     -->
-<!-- ============================ -->
+<!-- Bottom Action Bar -->
 <div class="ticket-action-bar">
     <button>Create Quote</button>
     <button>Request Payment</button>
@@ -101,11 +137,11 @@
 <script defer src="/admin/js/supabase.js"></script>
 
 <script>
+/* ---------------------------------------------------------
+   LOAD TICKET INFO
+--------------------------------------------------------- */
 async function loadTicket() {
-    // Wait for supabase client
-    while (!window.client) {
-        await new Promise(r => setTimeout(r, 10));
-    }
+    while (!window.client) await new Promise(r => setTimeout(r, 10));
 
     const params = new URLSearchParams(window.location.search);
     const folder = params.get("folder");
@@ -114,7 +150,7 @@ async function loadTicket() {
     const fileBox = document.getElementById("fileList");
 
     if (!folder) {
-        formBox.innerHTML = "Missing folder parameter.";
+        formBox.innerHTML = "<p>Missing folder parameter.</p>";
         return;
     }
 
@@ -124,23 +160,20 @@ async function loadTicket() {
         .download(`${folder}/form.json`);
 
     if (jsonErr) {
-        console.error("form.json missing:", jsonErr);
         formBox.innerHTML = "<p>No form.json found.</p>";
     } else {
         const text = await jsonFile.text();
         const formData = JSON.parse(text);
 
-        let html = "<h2>Form Submission</h2>";
-
+        let html = `<h2>Form Submission</h2>`;
         for (const [key, value] of Object.entries(formData)) {
             html += `
                 <div class="field-row">
-                    <span class="field-label">${key}:</span> ${value}
+                    <div><span class="field-label">${key}:</span> ${value}</div>
                 </div>
             `;
         }
-
-        formBox.innerHTML = html;
+        formBox.innerHTML = '<div class="card">' + html + '</div>';
     }
 
     // Load uploaded files
@@ -149,13 +182,12 @@ async function loadTicket() {
         .list(folder);
 
     if (fErr) {
-        console.error(fErr);
-        fileBox.innerHTML = "Error loading files.";
+        fileBox.innerHTML = "<p>Error loading files.</p>";
         return;
     }
 
     if (!files || files.length === 0) {
-        fileBox.innerHTML = "No uploaded files.";
+        fileBox.innerHTML = "<p>No uploaded files.</p>";
         return;
     }
 
@@ -163,32 +195,24 @@ async function loadTicket() {
     for (const file of files) {
         if (file.name === "form.json" || file.name === ".keep") continue;
 
-        const { data: signed, error: signedErr } = await window.client.storage
+        const { data: signed } = await window.client.storage
             .from("quotes_bucket")
             .createSignedUrl(`${folder}/${file.name}`, 3600);
 
-        if (signedErr) {
-            console.error("Signed URL error:", signedErr);
-            continue;
-        }
-
-fileHTML += `
-    <div class="field-row" style="display:flex; justify-content:space-between; align-items:center;">
-        <a class="file-link" href="${signed.signedUrl}" target="_blank">${file.name}</a>
-        <button class="delete-btn" data-filename="${file.name}" style="background:red;color:white;border:0;padding:6px 10px;cursor:pointer;">
-            Delete
-        </button>
-    </div>
-`;
-
+        fileHTML += `
+            <div class="field-row">
+                <a class="file-link" href="${signed.signedUrl}" target="_blank">${file.name}</a>
+                <button class="delete-btn" data-filename="${file.name}">Delete</button>
+            </div>
+        `;
     }
 
     fileBox.innerHTML = fileHTML;
 }
 
-// ------------------------------------------
-// FILE UPLOAD LOGIC
-// ------------------------------------------
+/* ---------------------------------------------------------
+   UPLOAD FILE
+--------------------------------------------------------- */
 document.getElementById("uploadBtn").addEventListener("click", () => {
     document.getElementById("filePicker").click();
 });
@@ -197,31 +221,49 @@ document.getElementById("filePicker").addEventListener("change", async (event) =
     const file = event.target.files[0];
     if (!file) return;
 
+    while (!window.client) await new Promise(r => setTimeout(r, 10));
+
     const params = new URLSearchParams(window.location.search);
     const folder = params.get("folder");
-
-    // Wait for Supabase
-    while (!window.client) {
-        await new Promise(r => setTimeout(r, 10));
-    }
-
     const path = `${folder}/${file.name}`;
 
-    // Upload file
-    const { data, error } = await window.client.storage
+    const { error } = await window.client.storage
         .from("quotes_bucket")
         .upload(path, file, { upsert: true });
 
-if (error) {
-    alert("Upload failed: " + JSON.stringify(error, null, 2));
-    console.error("UPLOAD ERROR:", error);
-    return;
-}
+    if (error) {
+        alert("Upload failed.");
+        return;
+    }
 
-
-    // Refresh file list
     await loadTicket();
-    alert("File uploaded.");
+});
+
+/* ---------------------------------------------------------
+   DELETE FILE
+--------------------------------------------------------- */
+document.addEventListener("click", async (event) => {
+    if (!event.target.classList.contains("delete-btn")) return;
+
+    const filename = event.target.dataset.filename;
+    if (!confirm(`Delete "${filename}"?`)) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const folder = params.get("folder");
+    const fullPath = `${folder}/${filename}`;
+
+    while (!window.client) await new Promise(r => setTimeout(r, 10));
+
+    const { error } = await window.client.storage
+        .from("quotes_bucket")
+        .remove([fullPath]);
+
+    if (error) {
+        alert("Delete failed.");
+        return;
+    }
+
+    await loadTicket();
 });
 
 document.addEventListener("DOMContentLoaded", loadTicket);
