@@ -7,155 +7,102 @@
     <link rel="stylesheet" href="/styles.css">
 
     <style>
-        /* Dashboard-specific layout */
-        .dashboard-container {
-            max-width: 1000px;
-            margin: 60px auto;
-            padding: 20px;
+        body {
+            background: var(--dark) url('/assets/background.png') repeat !important;
         }
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 20px;
+        #tickets ul {
+            list-style: none;
+            padding-left: 0;
         }
 
-        .dashboard-card {
-            background: var(--white-overlay);
-            border: 1px solid rgba(255,255,255,0.15);
-            padding: 25px;
-            backdrop-filter: blur(6px);
+        #tickets li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        a.ticket-link {
             color: white;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s ease;
-        }
-
-        .dashboard-card:hover {
-            background: rgba(255,255,255,0.18);
-        }
-
-        /* Ticket list */
-        .ticket-card {
-            background: rgba(0,0,0,0.55);
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .ticket-card h2 {
-            margin-bottom: 15px;
-            color: var(--off-white);
-            border-bottom: 1px solid rgba(255,255,255,0.15);
-            padding-bottom: 6px;
-        }
-
-        #ticketList a {
-            display: block;
-            padding: 10px;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
             text-decoration: none;
-            color: white;
         }
 
-        #ticketList a:hover {
-            background: rgba(255,255,255,0.2);
+        a.ticket-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 
 <body>
 
-<div class="dashboard-container">
+<h1 style="color:white;">Dashboard</h1>
 
-    <!-- Dashboard tiles -->
-    <div class="dashboard-grid">
+<h2 style="color:white;">Tickets</h2>
+<div id="tickets" style="color:white; padding:20px;"></div>
 
-        <!-- FIXED: tile now loads tickets -->
-        <div class="dashboard-card" onclick="loadTickets()">
-            <h3>Tickets</h3>
-            <p>View and manage all submitted quotes.</p>
-        </div>
-
-        <div class="dashboard-card">
-            <h3>Garments</h3>
-            <p>Coming soon.</p>
-        </div>
-
-        <div class="dashboard-card">
-            <h3>Pricing</h3>
-            <p>Coming soon.</p>
-        </div>
-
-        <div class="dashboard-card">
-            <h3>PO Manager</h3>
-            <p>Coming soon.</p>
-        </div>
-
-    </div>
-
-    <!-- TICKET LIST -->
-    <div class="ticket-card" style="margin-top:40px;">
-        <h2>Tickets</h2>
-        <div id="ticketList">Loading tickets…</div>
-    </div>
-
-</div>
+<h2 style="color:white;">Recent Quotes</h2>
+<div id="quotes" style="color:white; padding:20px;"></div>
 
 <!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 
-<!-- Config + Auth Guard -->
-<script src="/admin/js/supabase.js"></script>
-<script src="/admin/js/auth.js"></script>
+<!-- Global config + auth -->
+<script defer src="/admin/js/supabase.js"></script>
+<script defer src="/admin/js/auth.js"></script>
 
-<!-- =============================== -->
-<!-- INLINE TICKET LOADER (replacing dashboard.js) -->
-<!-- =============================== -->
+<!-- Inline Dashboard Logic -->
 <script>
-async function loadTickets() {
-
-    // Wait until Supabase client is available
+async function loadDashboard() {
+    // Wait until Supabase client is ready
     while (!window.client) {
         await new Promise(r => setTimeout(r, 10));
     }
 
-    const ticketBox = document.getElementById("ticketList");
-    ticketBox.innerHTML = "Loading…";
+    const bucket = "quotes_bucket";
 
     const { data, error } = await window.client
         .storage
-        .from("quotes_bucket")
-        .list("", { limit: 1000 });
+        .from(bucket)
+        .list("", {
+            limit: 1000,
+            sortBy: { column: "name", order: "asc" }
+        });
+
+    const ticketDiv = document.getElementById("tickets");
 
     if (error) {
-        console.error(error);
-        ticketBox.innerHTML = "Error loading tickets.";
+        console.error("Storage error:", error);
+        ticketDiv.innerHTML = "<p>Error loading ticket folders.</p>";
         return;
     }
 
-    const folders = data.filter(item => item.type === "folder" || item.type === "dir");
+    // Filter ONLY directories
+    const folders = data.filter(item =>
+        item.type === "dir" ||
+        item.type === "folder" ||
+        item.type === "directory"
+    );
 
     if (folders.length === 0) {
-        ticketBox.innerHTML = "No tickets found.";
+        ticketDiv.innerHTML = "<p>No tickets found.</p>";
         return;
     }
 
-    let html = "";
+    let html = "<ul>";
     folders.forEach(f => {
         html += `
-            <a href="/admin/ticket.html?folder=${encodeURIComponent(f.name)}">
-                ${f.name}
-            </a>
+            <li>
+                <a class="ticket-link" href="/admin/ticket.html?folder=${encodeURIComponent(f.name)}">
+                    ${f.name}
+                </a>
+            </li>
         `;
     });
+    html += "</ul>";
 
-    ticketBox.innerHTML = html;
+    ticketDiv.innerHTML = html;
 }
 
-// Load tickets automatically on page load
-document.addEventListener("DOMContentLoaded", loadTickets);
+document.addEventListener("DOMContentLoaded", loadDashboard);
 </script>
 
 </body>
