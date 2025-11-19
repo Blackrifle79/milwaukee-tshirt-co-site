@@ -40,7 +40,7 @@
         }
 
         /* ----------------------------- */
-        /*  STICKY ACTION BAR (NEW)      */
+        /*  STICKY ACTION BAR            */
         /* ----------------------------- */
         .ticket-action-bar {
             position: fixed;
@@ -85,12 +85,16 @@
 <h2>Uploaded Files</h2>
 <div id="fileList" class="section"></div>
 
+<!-- Hidden file picker for uploads -->
+<input type="file" id="filePicker" style="display:none;" />
+
 <!-- ============================ -->
-<!-- NEW STICKY BOTTOM ACTION BAR -->
+<!-- STICKY BOTTOM ACTION BAR     -->
 <!-- ============================ -->
 <div class="ticket-action-bar">
     <button>Create Quote</button>
     <button>Request Payment</button>
+    <button id="uploadBtn">Upload File</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
@@ -114,7 +118,7 @@ async function loadTicket() {
         return;
     }
 
-    // 1️⃣ Load form.json
+    // Load form.json
     const { data: jsonFile, error: jsonErr } = await window.client.storage
         .from("quotes_bucket")
         .download(`${folder}/form.json`);
@@ -139,7 +143,7 @@ async function loadTicket() {
         formBox.innerHTML = html;
     }
 
-    // 2️⃣ Load uploaded files (FIXED PUBLIC URLS)
+    // Load uploaded files
     const { data: files, error: fErr } = await window.client.storage
         .from("quotes_bucket")
         .list(folder);
@@ -155,32 +159,65 @@ async function loadTicket() {
         return;
     }
 
-let fileHTML = "";
-for (const file of files) {
-    if (file.name === "form.json" || file.name === ".keep") continue;
+    let fileHTML = "";
+    for (const file of files) {
+        if (file.name === "form.json" || file.name === ".keep") continue;
 
-    // ⭐ FIXED: Signed URL for private bucket
-    const { data: signed, error: signedErr } = await window.client.storage
-        .from("quotes_bucket")
-        .createSignedUrl(`${folder}/${file.name}`, 3600); // 1 hour
+        const { data: signed, error: signedErr } = await window.client.storage
+            .from("quotes_bucket")
+            .createSignedUrl(`${folder}/${file.name}`, 3600);
 
-    if (signedErr) {
-        console.error("Signed URL error:", signedErr);
-        continue;
+        if (signedErr) {
+            console.error("Signed URL error:", signedErr);
+            continue;
+        }
+
+        fileHTML += `
+            <div class="field-row">
+                <a class="file-link" href="${signed.signedUrl}" target="_blank">${file.name}</a>
+            </div>
+        `;
     }
 
-    const publicUrl = signed.signedUrl;
-
-    fileHTML += `
-        <div class="field-row">
-            <a class="file-link" href="${publicUrl}" target="_blank">${file.name}</a>
-        </div>
-    `;
+    fileBox.innerHTML = fileHTML;
 }
 
-fileBox.innerHTML = fileHTML;
+// ------------------------------------------
+// FILE UPLOAD LOGIC
+// ------------------------------------------
+document.getElementById("uploadBtn").addEventListener("click", () => {
+    document.getElementById("filePicker").click();
+});
 
-}
+document.getElementById("filePicker").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const folder = params.get("folder");
+
+    // Wait for Supabase
+    while (!window.client) {
+        await new Promise(r => setTimeout(r, 10));
+    }
+
+    const path = `${folder}/${file.name}`;
+
+    // Upload file
+    const { data, error } = await window.client.storage
+        .from("quotes_bucket")
+        .upload(path, file, { upsert: true });
+
+    if (error) {
+        alert("Upload failed.");
+        console.error(error);
+        return;
+    }
+
+    // Refresh file list
+    await loadTicket();
+    alert("File uploaded.");
+});
 
 document.addEventListener("DOMContentLoaded", loadTicket);
 </script>
