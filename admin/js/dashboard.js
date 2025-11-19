@@ -26,7 +26,7 @@ async function loadDashboard() {
     // Load ticket folders (storage)
     const { data: tickets, error: tErr } = await supabase
         .storage
-        .from("quotes")
+        .from("quotes_bucket")
         .list("", { limit: 100 });
 
     const ticketDiv = document.getElementById("tickets");
