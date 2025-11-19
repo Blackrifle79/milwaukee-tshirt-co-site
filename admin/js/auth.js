@@ -1,9 +1,8 @@
 // Redirect to login if not authenticated
-(async () => {
-    if (!window.client) {
-        console.error("Supabase client missing.");
-        window.location.href = "login.html";
-        return;
+async function verifyAuth() {
+    // Wait until client is available
+    while (!window.client) {
+        await new Promise(r => setTimeout(r, 10));
     }
 
     const { data: { session } } = await window.client.auth.getSession();
@@ -11,4 +10,6 @@
     if (!session) {
         window.location.href = "login.html";
     }
-})();
+}
+
+verifyAuth();
