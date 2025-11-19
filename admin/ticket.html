@@ -10,6 +10,7 @@
             background: var(--dark) url('/assets/background.png') repeat !important;
             color: white;
             padding: 20px;
+            padding-bottom: 90px; /* Prevents content hiding behind action bar */
         }
 
         .section {
@@ -71,11 +72,6 @@
         .ticket-action-bar button:hover {
             background: white;
             border-color: white;
-        }
-
-        /* Add bottom padding so content isn't hidden behind sticky bar */
-        body {
-            padding-bottom: 90px;
         }
     </style>
 </head>
@@ -143,7 +139,7 @@ async function loadTicket() {
         formBox.innerHTML = html;
     }
 
-    // 2️⃣ Load uploaded files
+    // 2️⃣ Load uploaded files (FIXED PUBLIC URLS)
     const { data: files, error: fErr } = await window.client.storage
         .from("quotes_bucket")
         .list(folder);
@@ -161,11 +157,14 @@ async function loadTicket() {
 
     let fileHTML = "";
     for (const file of files) {
-        if (file.name === "form.json") continue;
+        if (file.name === "form.json" || file.name === ".keep") continue;
 
-        const publicUrl = window.client.storage
+        // ⭐ FIXED PUBLIC URL HANDLING
+        const { data: urlData } = window.client.storage
             .from("quotes_bucket")
-            .getPublicUrl(`${folder}/${file.name}`).data.publicUrl;
+            .getPublicUrl(`${folder}/${file.name}`);
+
+        const publicUrl = urlData.publicUrl;
 
         fileHTML += `
             <div class="field-row">
