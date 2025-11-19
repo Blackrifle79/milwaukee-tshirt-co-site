@@ -1,6 +1,11 @@
 async function loadDashboard() {
+    // 1. Add the wait loop for safety, assuming the client is initialized in another deferred script
+    while (!window.client) {
+        await new Promise(r => setTimeout(r, 10));
+    }
+
     // Load recent quotes
-    const { data: quotes, error: qErr } = await supabase
+    const { data: quotes, error: qErr } = await window.client 
         .from("quotes")
         .select("*")
         .order("created_at", { ascending: false })
@@ -24,7 +29,8 @@ async function loadDashboard() {
     }
 
     // Load ticket folders (storage)
-    const { data: tickets, error: tErr } = await supabase
+    // FIX: Changed 'supabase' to 'window.client' and confirmed bucket name is 'quotes_bucket'
+    const { data: tickets, error: tErr } = await window.client 
         .storage
         .from("quotes_bucket")
         .list("", { limit: 100 });
