@@ -3,38 +3,29 @@
 <head>
     <meta charset="utf-8" />
     <title>Admin Login</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
+
 <body>
 
-<h2>Admin Login</h2>
+<div class="admin-login-container">
+    <div class="admin-login-box">
 
-<input id="email" type="email" placeholder="Email"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
-<button id="loginBtn">Log In</button>
+        <h2>Admin Login</h2>
 
-<!-- Supabase (UMD build that exposes `supabase` global) -->
+        <input id="email" type="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <button onclick="login()">Log In</button>
+
+        <div id="login-status"></div>
+
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
-
-<!-- Your Supabase configuration -->
-<script src="js/supabase.js"></script>
-
-<script>
-document.getElementById("loginBtn").onclick = async () => {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    let { data, error } = await client.auth.signInWithPassword({
-        email,
-        password
-    });
-
-    if (error) {
-        alert(error.message);
-    } else {
-        window.location.href = "dashboard.html";
-    }
-};
-</script>
+<script defer src="/admin/js/supabase.js"></script>
+<script defer src="/admin/js/auth.js"></script>
 
 </body>
 </html>

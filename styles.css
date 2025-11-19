@@ -360,3 +360,71 @@ nav {
     font-size: 14px;
   }
 }
+/* =================================================================== */
+/* ADMIN LOGIN PAGE                                                    */
+/* =================================================================== */
+
+.admin-login-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--dark) url('/assets/background.png') repeat;
+  background-size: cover;
+}
+
+.admin-login-box {
+  width: 360px;
+  padding: 35px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 0; /* Matches your square style */
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  text-align: center;
+}
+
+.admin-login-box h2 {
+  margin-bottom: 25px;
+  color: var(--white);
+  font-weight: 600;
+}
+
+/* Inputs */
+.admin-login-box input {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  background: rgba(255,255,255,0.95);
+  color: var(--dark);
+  border: 1px solid var(--light-grey);
+  border-radius: 0;
+  font-size: 16px;
+}
+
+/* Button */
+.admin-login-box button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  background: rgba(35, 35, 35, 0.7);
+  color: var(--white);
+  border: 1px solid var(--light-grey);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 0;
+  transition: 0.2s ease;
+}
+
+.admin-login-box button:hover {
+  background: rgba(35, 35, 35, 0.9);
+  border-color: var(--white);
+}
+
+#login-status {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #ffb7b7;
+}
