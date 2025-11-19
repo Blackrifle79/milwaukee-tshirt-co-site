@@ -37,6 +37,46 @@
         .file-link:hover {
             text-decoration: underline;
         }
+
+        /* ----------------------------- */
+        /*  STICKY ACTION BAR (NEW)      */
+        /* ----------------------------- */
+        .ticket-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(6px);
+            border-top: 1px solid rgba(255,255,255,0.18);
+            padding: 12px 18px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .ticket-action-bar button {
+            background: rgba(255,255,255,0.85);
+            color: var(--dark);
+            border: 1px solid var(--light-grey);
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 0;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .ticket-action-bar button:hover {
+            background: white;
+            border-color: white;
+        }
+
+        /* Add bottom padding so content isn't hidden behind sticky bar */
+        body {
+            padding-bottom: 90px;
+        }
     </style>
 </head>
 
@@ -48,6 +88,14 @@
 
 <h2>Uploaded Files</h2>
 <div id="fileList" class="section"></div>
+
+<!-- ============================ -->
+<!-- NEW STICKY BOTTOM ACTION BAR -->
+<!-- ============================ -->
+<div class="ticket-action-bar">
+    <button>Create Quote</button>
+    <button>Request Payment</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 <script defer src="/admin/js/supabase.js"></script>
@@ -70,9 +118,7 @@ async function loadTicket() {
         return;
     }
 
-    // --------------------------------------------
-    // 1️⃣ LOAD form.json FROM STORAGE
-    // --------------------------------------------
+    // 1️⃣ Load form.json
     const { data: jsonFile, error: jsonErr } = await window.client.storage
         .from("quotes_bucket")
         .download(`${folder}/form.json`);
@@ -97,9 +143,7 @@ async function loadTicket() {
         formBox.innerHTML = html;
     }
 
-    // --------------------------------------------
-    // 2️⃣ LIST UPLOADED FILES IN FOLDER
-    // --------------------------------------------
+    // 2️⃣ Load uploaded files
     const { data: files, error: fErr } = await window.client.storage
         .from("quotes_bucket")
         .list(folder);
@@ -117,7 +161,7 @@ async function loadTicket() {
 
     let fileHTML = "";
     for (const file of files) {
-        if (file.name === "form.json") continue; // already displayed
+        if (file.name === "form.json") continue;
 
         const publicUrl = window.client.storage
             .from("quotes_bucket")
