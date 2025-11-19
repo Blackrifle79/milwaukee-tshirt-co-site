@@ -57,92 +57,90 @@
 
 <script>
 async function loadTicket() {
-    // Wait for Supabase client
     while (!window.client) {
         await new Promise(r => setTimeout(r, 10));
     }
 
-    // Read folder name from URL
     const params = new URLSearchParams(window.location.search);
     const folder = params.get("folder");
 
+    const quoteBox = document.getElementById("quoteData");
+    const fileBox = document.getElementById("fileList");
+
     if (!folder) {
-        document.getElementById("quoteData").innerHTML = "<p>No folder specified.</p>";
+        quoteBox.innerHTML = "Missing folder parameter.";
         return;
     }
 
-    const bucket = "quotes_bucket";
+    // Extract quote number from "18503_dan-zarwell"
+    const quoteNumber = parseInt(folder.split("_")[0]);
 
-    // -----------------------------
-    // 1. LOAD QUOTE ROW FROM TABLE
-    // -----------------------------
-    const { data: quote, error: quoteErr } = await window.client
-        .from("quotes")
-        .select("*")
-        .eq("quote_number", folder)
-        .single();
-
-    const quoteDiv = document.getElementById("quoteData");
-
-    if (quoteErr || !quote) {
-        quoteDiv.innerHTML = "<p>Quote data not found in database.</p>";
-    } else {
-        let html = "<h2>Quote Submission</h2>";
-
-        // AUTO-GENERATE fields dynamically
-        for (const key in quote) {
-            html += `
-                <div class="field-row">
-                    <div class="field-label">${key}</div>
-                    <div>${quote[key] ?? ""}</div>
-                </div>
-            `;
-        }
-
-        quoteDiv.innerHTML = html;
+    if (isNaN(quoteNumber)) {
+        quoteBox.innerHTML = "Invalid ticket folder format.";
+        return;
     }
 
-    // -----------------------------
-    // 2. LOAD ALL FILES IN BUCKET FOLDER
-    // -----------------------------
-    const { data: files, error: fileErr } = await window.client
+    // Fetch quote row
+    const { data: quote, error: qErr } = await window.client
+        .from("quotes")
+        .select("*")
+        .eq("quote_number", quoteNumber)
+        .maybeSingle();
+
+    if (qErr) {
+        console.error("DB Error:", qErr);
+        quoteBox.innerHTML = "Database error loading quote.";
+        return;
+    }
+
+    if (!quote) {
+        quoteBox.innerHTML = "Quote data not found in database.";
+        return;
+    }
+
+    // Auto-build rows
+    let html = "";
+    Object.entries(quote).forEach(([key, value]) => {
+        html += `
+            <div class="field-row">
+                <span class="field-label">${key}:</span> ${value ?? ""}
+            </div>
+        `;
+    });
+
+    quoteBox.innerHTML = html;
+
+    // List uploaded files
+    const { data: files, error: fErr } = await window.client
         .storage
-        .from(bucket)
+        .from("quotes_bucket")
         .list(folder, { limit: 100 });
 
-    const fileDiv = document.getElementById("fileList");
-
-    if (fileErr) {
-        fileDiv.innerHTML = "<p>Error loading files.</p>";
+    if (fErr) {
+        console.error("File Error:", fErr);
+        fileBox.innerHTML = "Error loading files.";
         return;
     }
 
     if (!files || files.length === 0) {
-        fileDiv.innerHTML = "<p>No uploads found.</p>";
+        fileBox.innerHTML = "No uploaded files found.";
         return;
     }
 
-    let fileHtml = "";
+    let fileHTML = "";
+    files.forEach(file => {
+        const publicUrl = window.client.storage
+            .from("quotes_bucket")
+            .getPublicUrl(`${folder}/${file.name}`).data.publicUrl;
 
-    for (const f of files) {
-        // Skip placeholder files
-        if (f.name === ".keep") continue;
-
-        const { data: publicUrl } = window.client
-            .storage
-            .from(bucket)
-            .getPublicUrl(`${folder}/${f.name}`);
-
-        fileHtml += `
+        fileHTML += `
             <div class="field-row">
-                <a class="file-link" href="${publicUrl.publicUrl}" target="_blank">
-                    ${f.name}
-                </a>
+                <a class="file-link" href="${publicUrl}" target="_blank">${file.name}</a>
             </div>
         `;
-    }
+    });
 
-    fileDiv.innerHTML = fileHtml;
+    fileBox.innerHTML = fileHTML;
 }
 
 document.addEventListener("DOMContentLoaded", loadTicket);
