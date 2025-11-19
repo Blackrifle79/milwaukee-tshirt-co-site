@@ -29,14 +29,6 @@
             font-weight: bold;
             color: #8fe3ff;
         }
-
-        .file-link {
-            color: #ffd27f;
-            text-decoration: none;
-        }
-        .file-link:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 
@@ -49,14 +41,12 @@
 <h2>Uploaded Files</h2>
 <div id="fileList" class="section"></div>
 
-<!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
-
-<!-- Config -->
 <script defer src="/admin/js/supabase.js"></script>
 
 <script>
 async function loadTicket() {
+
     while (!window.client) {
         await new Promise(r => setTimeout(r, 10));
     }
@@ -72,15 +62,14 @@ async function loadTicket() {
         return;
     }
 
-    // Extract quote number from "18503_dan-zarwell"
-    const quoteNumber = parseInt(folder.split("_")[0]);
+    const quoteNumber = Number(folder.split("_")[0]);
 
-    if (isNaN(quoteNumber)) {
-        quoteBox.innerHTML = "Invalid ticket folder format.";
+    if (!quoteNumber) {
+        quoteBox.innerHTML = "Invalid folder format.";
         return;
     }
 
-    // Fetch quote row
+    // 1️⃣ Load quote row
     const { data: quote, error: qErr } = await window.client
         .from("quotes")
         .select("*")
@@ -88,47 +77,47 @@ async function loadTicket() {
         .maybeSingle();
 
     if (qErr) {
-        console.error("DB Error:", qErr);
-        quoteBox.innerHTML = "Database error loading quote.";
+        console.error(qErr);
+        quoteBox.innerHTML = "Error loading quote data.";
         return;
     }
 
     if (!quote) {
-        quoteBox.innerHTML = "Quote data not found in database.";
+        quoteBox.innerHTML = "No quote found.";
         return;
     }
 
-    // Auto-build rows
-    let html = "";
-    Object.entries(quote).forEach(([key, value]) => {
-        html += `
+    // Render database fields
+    let fields = "";
+    for (const [key, value] of Object.entries(quote)) {
+        fields += `
             <div class="field-row">
                 <span class="field-label">${key}:</span> ${value ?? ""}
             </div>
         `;
-    });
+    }
 
-    quoteBox.innerHTML = html;
+    quoteBox.innerHTML = fields;
 
-    // List uploaded files
+    // 2️⃣ Load files from bucket
     const { data: files, error: fErr } = await window.client
         .storage
         .from("quotes_bucket")
-        .list(folder, { limit: 100 });
+        .list(folder);
 
     if (fErr) {
-        console.error("File Error:", fErr);
+        console.error(fErr);
         fileBox.innerHTML = "Error loading files.";
         return;
     }
 
     if (!files || files.length === 0) {
-        fileBox.innerHTML = "No uploaded files found.";
+        fileBox.innerHTML = "No uploaded files.";
         return;
     }
 
     let fileHTML = "";
-    files.forEach(file => {
+    for (const file of files) {
         const publicUrl = window.client.storage
             .from("quotes_bucket")
             .getPublicUrl(`${folder}/${file.name}`).data.publicUrl;
@@ -138,7 +127,7 @@ async function loadTicket() {
                 <a class="file-link" href="${publicUrl}" target="_blank">${file.name}</a>
             </div>
         `;
-    });
+    }
 
     fileBox.innerHTML = fileHTML;
 }
