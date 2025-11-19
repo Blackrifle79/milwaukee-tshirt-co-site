@@ -35,7 +35,7 @@
             background: rgba(255,255,255,0.18);
         }
 
-        /* Ticket list card */
+        /* Ticket list */
         .ticket-card {
             background: rgba(0,0,0,0.55);
             padding: 20px;
@@ -72,7 +72,8 @@
     <!-- Dashboard tiles -->
     <div class="dashboard-grid">
 
-        <div class="dashboard-card" onclick="window.location.href='dashboard.html'">
+        <!-- FIXED: tile now loads tickets -->
+        <div class="dashboard-card" onclick="loadTickets()">
             <h3>Tickets</h3>
             <p>View and manage all submitted quotes.</p>
         </div>
@@ -106,11 +107,56 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- Config + Auth Guard -->
-<script src="js/supabase.js"></script>
-<script src="js/auth.js"></script>
+<script src="/admin/js/supabase.js"></script>
+<script src="/admin/js/auth.js"></script>
 
-<!-- Ticket Loader -->
-<script src="js/dashboard.js"></script>
+<!-- =============================== -->
+<!-- INLINE TICKET LOADER (replacing dashboard.js) -->
+<!-- =============================== -->
+<script>
+async function loadTickets() {
+
+    // Wait until Supabase client is available
+    while (!window.client) {
+        await new Promise(r => setTimeout(r, 10));
+    }
+
+    const ticketBox = document.getElementById("ticketList");
+    ticketBox.innerHTML = "Loading…";
+
+    const { data, error } = await window.client
+        .storage
+        .from("quotes_bucket")
+        .list("", { limit: 1000 });
+
+    if (error) {
+        console.error(error);
+        ticketBox.innerHTML = "Error loading tickets.";
+        return;
+    }
+
+    const folders = data.filter(item => item.type === "folder" || item.type === "dir");
+
+    if (folders.length === 0) {
+        ticketBox.innerHTML = "No tickets found.";
+        return;
+    }
+
+    let html = "";
+    folders.forEach(f => {
+        html += `
+            <a href="/admin/ticket.html?folder=${encodeURIComponent(f.name)}">
+                ${f.name}
+            </a>
+        `;
+    });
+
+    ticketBox.innerHTML = html;
+}
+
+// Load tickets automatically on page load
+document.addEventListener("DOMContentLoaded", loadTickets);
+</script>
 
 </body>
 </html>
