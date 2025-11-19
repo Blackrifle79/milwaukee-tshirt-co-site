@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Ticket Viewer</title>
+
+    <link rel="stylesheet" href="/styles.css">
+
+    <style>
+        body {
+            background: var(--dark) url('/assets/background.png') repeat !important;
+            color: white;
+        }
+        a.file-link {
+            color: #9cf;
+            text-decoration: none;
+        }
+        a.file-link:hover {
+            text-decoration: underline;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+<a href="/admin/dashboard.html" class="back-link">← Back to Dashboard</a>
+
+<h1 id="title"></h1>
+<div id="fileList" style="padding:20px;"></div>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+
+<!-- Supabase config + auth -->
+<script defer src="/admin/js/supabase.js"></script>
+<script defer src="/admin/js/auth.js"></script>
+
+<script>
+async function loadTicket() {
+    while (!window.client) {
+        await new Promise(r => setTimeout(r, 10));
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const folder = params.get("folder");
+
+    if (!folder) {
+        document.getElementById("title").innerText = "Invalid ticket.";
+        return;
+    }
+
+    document.getElementById("title").innerText = "Ticket: " + folder;
+
+    const { data, error } = await window.client
+        .storage
+        .from("quotes_bucket")
+        .list(folder, {
+            limit: 1000,
+            sortBy: { column: "name", order: "asc" }
+        });
+
+    const fileDiv = document.getElementById("fileList");
+
+    if (error) {
+        fileDiv.innerHTML = "<p>Error loading files.</p>";
+        console.error(error);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        fileDiv.innerHTML = "<p>No files in this ticket folder.</p>";
+        return;
+    }
+
+    let html = "<ul>";
+    for (const item of data) {
+
+        if (item.id === null) continue; // skip subfolders
+
+        const { data: urlData } = await window.client
+            .storage
+            .from("quotes_bucket")
+            .getPublicUrl(`${folder}/${item.name}`);
+
+        html += `
+            <li>
+                <a class="file-link" href="${urlData.publicUrl}" target="_blank">
+                    ${item.name}
+                </a>
+            </li>
+        `;
+    }
+    html += "</ul>";
+
+    fileDiv.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded", loadTicket);
+</script>
+
+</body>
+</html>
