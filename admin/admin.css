@@ -209,3 +209,47 @@ select {
     font-weight: 600;
     text-align: left;
 }
+/* =================================================================== */
+/* DASHBOARD CARDS — exact look and behavior restored                  */
+/* =================================================================== */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.dashboard-card {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-border);
+    padding: 24px;
+    text-align: center;
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    transition: 0.2s ease;
+    border-radius: 8px;
+}
+
+.dashboard-card h3 {
+    color: var(--admin-heading);
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.dashboard-card p {
+    color: var(--admin-text);
+    font-size: 15px;
+    opacity: 0.9;
+}
+
+.dashboard-card:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.22);
+}
+
+/* Make entire card clickable */
+.dashboard-card {
+    user-select: none;
+}
