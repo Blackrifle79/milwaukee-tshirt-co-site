@@ -1,6 +1,37 @@
-// Redirect to login if not authenticated
+// ================================
+// LOGIN FUNCTION
+// ================================
+async function login() {
+    while (!window.client) {
+        await new Promise(r => setTimeout(r, 10));
+    }
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const status = document.getElementById("login-status");
+
+    status.innerText = "Checking…";
+
+    const { data, error } = await window.client.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        console.error(error);
+        status.innerText = "Invalid email or password.";
+        return;
+    }
+
+    window.location.href = "/admin/dashboard.html";
+}
+
+
+
+// ================================
+// AUTH GUARD
+// ================================
 async function verifyAuth() {
-    // Wait until client is available
     while (!window.client) {
         await new Promise(r => setTimeout(r, 10));
     }
@@ -9,7 +40,7 @@ async function verifyAuth() {
 
     const currentPage = window.location.pathname;
 
-    // ❗ Prevent infinite redirect loop on login page
+    // Prevent infinite redirect loop on admin login page
     if (!session && !currentPage.includes("login.html")) {
         window.location.href = "login.html";
     }
