@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const placeholderPath = `${folderName}/.keep`;
 
     const { error: placeholderError } = await supabase.storage
-      .from("quotes")
+      .from("quotes_bucket")
       .upload(placeholderPath, placeholderBlob, { upsert: true });
 
     if (placeholderError) {
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const filePath = `${folderName}/${artFile.name}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("quotes")
+        .from("quotes_bucket")
         .upload(filePath, artFile, { upsert: true });
 
       if (uploadError) {
