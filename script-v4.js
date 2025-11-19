@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // ------------------------------------------------------------
-// 5. QUOTE FORM SUBMISSION (UPDATED, NO NESTED FOLDERS)
+// 5. QUOTE FORM SUBMISSION (VALIDATION + FIXED STORAGE PATHS)
 // ------------------------------------------------------------
 document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -94,7 +94,20 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   const artFile = document.getElementById("artfile").files[0] || null;
 
   // ------------------------------------------------------------
-  // 5A – INSERT QUOTE (database generates quote_number)
+  // VALIDATION FOR NOT NULL DB FIELDS
+  // ------------------------------------------------------------
+  if (!firstName || !lastName) {
+    status.innerText = "❌ Please enter first AND last name.";
+    return;
+  }
+
+  if (!email) {
+    status.innerText = "❌ Please enter an email address.";
+    return;
+  }
+
+  // ------------------------------------------------------------
+  // 5A – INSERT QUOTE
   // ------------------------------------------------------------
   const insertPayload = {
     name,
@@ -127,21 +140,19 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   console.log("Assigned Quote Number:", quoteNumber);
 
   // ------------------------------------------------------------
-  // 5B – BUILD FINAL FOLDER NAME (QuoteNumber_LastNameSlug)
+  // 5B – BUILD FINAL FOLDER NAME
   // ------------------------------------------------------------
   const lastNameSlug = lastName.toLowerCase().replace(/[^a-z0-9]/g, "");
   const folderName = `${quoteNumber}_${lastNameSlug}`;
 
-  console.log("Assigned Folder Name:", folderName);
-
   // ------------------------------------------------------------
-  // 5C – CREATE FOLDER USING A .keep FILE (NO NESTED PATHS)
+  // 5C – CREATE FOLDER
   // ------------------------------------------------------------
   const placeholderBlob = new Blob(["keep"], { type: "text/plain" });
-  const placeholderPath = `${folderName}/.keep`;   // FIXED
+  const placeholderPath = `${folderName}/.keep`;
 
   const { error: placeholderError } = await supabase.storage
-    .from("quotes")   // FIXED BUCKET NAME
+    .from("quotes")
     .upload(placeholderPath, placeholderBlob, { upsert: true });
 
   if (placeholderError) {
@@ -149,15 +160,15 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   }
 
   // ------------------------------------------------------------
-  // 5D – UPLOAD ART FILE (NO NESTED PATHS)
+  // 5D – UPLOAD ART FILE
   // ------------------------------------------------------------
   let stored_art_path = null;
 
   if (artFile) {
-    const filePath = `${folderName}/${artFile.name}`;   // FIXED
+    const filePath = `${folderName}/${artFile.name}`;
 
     const { error: uploadError } = await supabase.storage
-      .from("quotes")   // FIXED BUCKET NAME
+      .from("quotes")
       .upload(filePath, artFile, { upsert: true });
 
     if (uploadError) {
@@ -170,7 +181,7 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   }
 
   // ------------------------------------------------------------
-  // 5E – SAVE ART PATH BACK TO QUOTE ROW
+  // 5E – SAVE ART URL BACK TO QUOTE ROW
   // ------------------------------------------------------------
   const { error: updateError } = await supabase
     .from("quotes")
