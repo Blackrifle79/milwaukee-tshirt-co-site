@@ -2,102 +2,147 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Ticket Viewer</title>
-
+    <title>Ticket</title>
     <link rel="stylesheet" href="/styles.css">
 
     <style>
         body {
             background: var(--dark) url('/assets/background.png') repeat !important;
             color: white;
+            padding: 20px;
         }
-        a.file-link {
-            color: #9cf;
+
+        .section {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+
+        .field-row {
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 6px;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #8fe3ff;
+        }
+
+        .file-link {
+            color: #ffd27f;
             text-decoration: none;
         }
-        a.file-link:hover {
+        .file-link:hover {
             text-decoration: underline;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #fff;
         }
     </style>
 </head>
 
 <body>
 
-<a href="/admin/dashboard.html" class="back-link">← Back to Dashboard</a>
+<h1>Ticket Details</h1>
 
-<h1 id="title"></h1>
-<div id="fileList" style="padding:20px;"></div>
+<div id="quoteData" class="section"></div>
 
-<!-- Supabase -->
+<h2>Uploaded Files</h2>
+<div id="fileList" class="section"></div>
+
+<!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 
-<!-- Supabase config + auth -->
+<!-- Config -->
 <script defer src="/admin/js/supabase.js"></script>
-<script defer src="/admin/js/auth.js"></script>
 
 <script>
 async function loadTicket() {
+    // Wait for Supabase client
     while (!window.client) {
         await new Promise(r => setTimeout(r, 10));
     }
 
+    // Read folder name from URL
     const params = new URLSearchParams(window.location.search);
     const folder = params.get("folder");
 
     if (!folder) {
-        document.getElementById("title").innerText = "Invalid ticket.";
+        document.getElementById("quoteData").innerHTML = "<p>No folder specified.</p>";
         return;
     }
 
-    document.getElementById("title").innerText = "Ticket: " + folder;
+    const bucket = "quotes_bucket";
 
-    const { data, error } = await window.client
+    // -----------------------------
+    // 1. LOAD QUOTE ROW FROM TABLE
+    // -----------------------------
+    const { data: quote, error: quoteErr } = await window.client
+        .from("quotes")
+        .select("*")
+        .eq("quote_number", folder)
+        .single();
+
+    const quoteDiv = document.getElementById("quoteData");
+
+    if (quoteErr || !quote) {
+        quoteDiv.innerHTML = "<p>Quote data not found in database.</p>";
+    } else {
+        let html = "<h2>Quote Submission</h2>";
+
+        // AUTO-GENERATE fields dynamically
+        for (const key in quote) {
+            html += `
+                <div class="field-row">
+                    <div class="field-label">${key}</div>
+                    <div>${quote[key] ?? ""}</div>
+                </div>
+            `;
+        }
+
+        quoteDiv.innerHTML = html;
+    }
+
+    // -----------------------------
+    // 2. LOAD ALL FILES IN BUCKET FOLDER
+    // -----------------------------
+    const { data: files, error: fileErr } = await window.client
         .storage
-        .from("quotes_bucket")
-        .list(folder, {
-            limit: 1000,
-            sortBy: { column: "name", order: "asc" }
-        });
+        .from(bucket)
+        .list(folder, { limit: 100 });
 
     const fileDiv = document.getElementById("fileList");
 
-    if (error) {
+    if (fileErr) {
         fileDiv.innerHTML = "<p>Error loading files.</p>";
-        console.error(error);
         return;
     }
 
-    if (!data || data.length === 0) {
-        fileDiv.innerHTML = "<p>No files in this ticket folder.</p>";
+    if (!files || files.length === 0) {
+        fileDiv.innerHTML = "<p>No uploads found.</p>";
         return;
     }
 
-    let html = "<ul>";
-    for (const item of data) {
+    let fileHtml = "";
 
-        if (item.id === null) continue; // skip subfolders
+    for (const f of files) {
+        // Skip placeholder files
+        if (f.name === ".keep") continue;
 
-        const { data: urlData } = await window.client
+        const { data: publicUrl } = window.client
             .storage
-            .from("quotes_bucket")
-            .getPublicUrl(`${folder}/${item.name}`);
+            .from(bucket)
+            .getPublicUrl(`${folder}/${f.name}`);
 
-        html += `
-            <li>
-                <a class="file-link" href="${urlData.publicUrl}" target="_blank">
-                    ${item.name}
+        fileHtml += `
+            <div class="field-row">
+                <a class="file-link" href="${publicUrl.publicUrl}" target="_blank">
+                    ${f.name}
                 </a>
-            </li>
+            </div>
         `;
     }
-    html += "</ul>";
 
-    fileDiv.innerHTML = html;
+    fileDiv.innerHTML = fileHtml;
 }
 
 document.addEventListener("DOMContentLoaded", loadTicket);
