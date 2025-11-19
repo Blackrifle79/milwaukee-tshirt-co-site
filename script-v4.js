@@ -16,7 +16,6 @@ window.onload = function () {
   setInterval(showNextSlide, 5000);
 };
 
-
 // ------------------------------------------------------------
 // 2. SUPABASE INITIALIZATION
 // ------------------------------------------------------------
@@ -25,7 +24,6 @@ const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyZXJjc2xndHRtbXRiY2piZ3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTUxNTIsImV4cCI6MjA3ODk3MTE1Mn0.ajqkYr3snQFReGCKJQe53Qe_Aa6zeMmTKbn_TAQZ2CI";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 
 // ------------------------------------------------------------
 // 3. LOAD GARMENT TYPES
@@ -58,7 +56,6 @@ async function loadGarments() {
       .join("");
 }
 
-
 // ------------------------------------------------------------
 // 4. PAGE LOAD & FORM INITIALIZATION
 // ------------------------------------------------------------
@@ -71,9 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const status = document.getElementById("quoteStatus");
     status.innerText = "Submitting… Please wait.";
 
-    // ------------------------------------------------------------
-    // Gather form fields
-    // ------------------------------------------------------------
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
     const phone = document.getElementById("phone").value.trim();
@@ -85,19 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const instructions = document.getElementById("instructions").value.trim();
     const artFile = document.getElementById("artfile").files[0] || null;
 
-    if (!name) {
-      status.innerText = "❌ Please enter your full name.";
-      return;
-    }
+    if (!name) { status.innerText = "❌ Please enter your full name."; return; }
+    if (!email) { status.innerText = "❌ Please enter an email address."; return; }
 
-    if (!email) {
-      status.innerText = "❌ Please enter an email address.";
-      return;
-    }
-
-    // ------------------------------------------------------------
-    // 5A – INSERT QUOTE INTO DATABASE
-    // ------------------------------------------------------------
     const insertPayload = {
       name,
       email,
@@ -127,22 +111,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const nameSlug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
     const folderName = `${quoteNumber}_${nameSlug}`;
 
-    // ------------------------------------------------------------
-    // 5C – CREATE FOLDER WITH .keep
-    // ------------------------------------------------------------
     const placeholderBlob = new Blob(["keep"], { type: "text/plain" });
     await supabase.storage
       .from("quotes_bucket")
       .upload(`${folderName}/.keep`, placeholderBlob, { upsert: true });
 
-    // ------------------------------------------------------------
-    // 5D – UPLOAD ART FILE
-    // ------------------------------------------------------------
     let stored_art_path = null;
 
     if (artFile) {
       const filePath = `${folderName}/${artFile.name}`;
-
       const { error: uploadError } = await supabase.storage
         .from("quotes_bucket")
         .upload(filePath, artFile, { upsert: true });
@@ -156,10 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
       stored_art_path = filePath;
     }
 
-    // ------------------------------------------------------------
-    // 5D.5 — NEW FEATURE
-    // Save FULL form data as form.json inside the folder
-    // ------------------------------------------------------------
     const formDataJSON = {
       name,
       email,
@@ -182,18 +155,50 @@ document.addEventListener("DOMContentLoaded", () => {
         { upsert: true }
       );
 
-    // ------------------------------------------------------------
-    // 5E – SAVE ART URL BACK TO DATABASE
-    // ------------------------------------------------------------
     await supabase
       .from("quotes")
       .update({ art_url: stored_art_path })
       .eq("id", quoteRow.id);
 
-    // ------------------------------------------------------------
-    // DONE
-    // ------------------------------------------------------------
     status.innerText = `✅ Quote #${quoteNumber} submitted successfully!`;
     document.getElementById("quoteForm").reset();
   });
+
+  // ------------------------------------------------------------
+  // 6. CONTACT FORM HANDLER (Supabase Edge Function)
+  // ------------------------------------------------------------
+  document.getElementById("contactForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const form = new FormData(e.target);
+
+    const payload = {
+      name: form.get("name"),
+      email: form.get("email"),
+      message: form.get("message")
+    };
+
+    try {
+      const res = await fetch(
+        "https://hrercslgttmmtbcjbgpz.supabase.co/functions/v1/contact-email",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }
+      );
+
+      if (res.ok) {
+        alert("Message sent! Thank you.");
+        e.target.reset();
+      } else {
+        alert("There was a problem sending your message.");
+        console.error("Contact form error:", await res.text());
+      }
+    } catch (err) {
+      alert("Network error sending your message.");
+      console.error("Contact form network error:", err);
+    }
+  });
+
 });
