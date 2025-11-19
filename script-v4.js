@@ -109,7 +109,12 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
   // ------------------------------------------------------------
   // 5A – INSERT QUOTE
   // ------------------------------------------------------------
-  const insertPayload = {
+const insertPayload = {
+    // ⬇️ ADD THESE TWO LINES ⬇️
+    first_name: firstName, 
+    last_name: lastName, 
+    // ⬆️ ADD THESE TWO LINES ⬆️
+    
     name,
     email,
     phone,
@@ -120,9 +125,9 @@ document.getElementById("quoteForm").addEventListener("submit", async (e) => {
     deadline,
     instructions,
     created_at: new Date().toISOString()
-  };
+};
 
-  console.log("DATA BEING INSERTED:", insertPayload);
+console.log("DATA BEING INSERTED:", insertPayload);
 
   const { data: quoteRow, error: insertError } = await supabase
     .from("quotes")
