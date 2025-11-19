@@ -5,7 +5,7 @@
     <title>Admin Dashboard</title>
 
     <!-- Load main site styles -->
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="/styles.css">
 
     <style>
         body {
@@ -32,13 +32,13 @@
 <!-- Supabase UMD -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 
-<!-- Config + Auth -->
-<script src="js/supabase.js"></script>
-<script src="js/auth.js"></script>
+<!-- Config + Auth (ABSOLUTE PATHS so Netlify always loads them) -->
+<script src="/admin/js/supabase.js"></script>
+<script src="/admin/js/auth.js"></script>
 
 <script>
 async function loadTickets() {
-    // Use the global `supabase` instance created in supabase.js
+    // Check if Supabase client is ready
     if (!window.client) {
         console.error("❌ Supabase client not found. Check supabase.js");
         document.getElementById("ticketList").innerHTML = "Supabase not initialized.";
@@ -47,14 +47,15 @@ async function loadTickets() {
 
     const bucket = "quotes_bucket";
 
-    const { data, error } = await window.client
-        .storage
-        .from(bucket)
-        .list("", {
-            limit: 1000,
-            offset: 0,
-            sortBy: { column: "name", order: "asc" }
-        });
+const { data, error } = await window.client
+    .storage
+    .from(bucket)
+    .list("quotes", {  // ← IMPORTANT: path added here
+        limit: 1000,
+        offset: 0,
+        sortBy: { column: "name", order: "asc" }
+    });
+
 
     if (error) {
         console.error("Error loading folders:", error);
@@ -78,7 +79,7 @@ async function loadTickets() {
     document.getElementById("ticketList").innerHTML = html;
 }
 
-// Delay until supabase.js finishes creating the client
+// Run once page is fully loaded
 window.addEventListener("DOMContentLoaded", loadTickets);
 </script>
 
