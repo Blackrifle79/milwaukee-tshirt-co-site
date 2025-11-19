@@ -180,7 +180,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const res = await fetch(
-        "https://hrercslgttmmtbcjbgpz.supabase.co/functions/v1/contact-email",
+        "https://hrercslgttmmtbcjbgpz.supabase.co/functions/v1/smart-endpoint",
+
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
