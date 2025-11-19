@@ -60,144 +60,143 @@ async function loadGarments() {
 
 
 // ------------------------------------------------------------
-// 4. PAGE LOAD
+// 4. PAGE LOAD & FORM INITIALIZATION (Combined Sections 4 and 5)
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   loadGarments();
-});
-
-
-// ------------------------------------------------------------
-// 5. QUOTE FORM SUBMISSION (VALIDATION + FIXED STORAGE PATHS)
-// ------------------------------------------------------------
-document.getElementById("quoteForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const status = document.getElementById("quoteStatus");
-  status.innerText = "Submitting… Please wait.";
 
   // ------------------------------------------------------------
-  // GATHER FORM VALUES (Updated for single name field)
+  // 5. QUOTE FORM SUBMISSION (VALIDATION + FIXED STORAGE PATHS)
+  // Moved INSIDE DOMContentLoaded to prevent TypeError
   // ------------------------------------------------------------
-  const name = document.getElementById("name").value.trim(); // Uses single 'name' field
-  const email = document.getElementById("email").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const garment_type = document.getElementById("garment_type").value;
-  const quality = document.getElementById("quality").value;
-  const colors = parseInt(document.getElementById("colors").value);
-  const quantity = parseInt(document.getElementById("quantity").value);
-  const deadline = document.getElementById("deadline").value || null;
-  const instructions = document.getElementById("instructions").value.trim();
-  const artFile = document.getElementById("artfile").files[0] || null;
+  document.getElementById("quoteForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  // ------------------------------------------------------------
-  // VALIDATION FOR NOT NULL DB FIELDS (Updated for single name check)
-  // ------------------------------------------------------------
-  if (!name) {
-    status.innerText = "❌ Please enter your full name.";
-    return;
-  }
+    const status = document.getElementById("quoteStatus");
+    status.innerText = "Submitting… Please wait.";
 
-  if (!email) {
-    status.innerText = "❌ Please enter an email address.";
-    return;
-  }
+    // ------------------------------------------------------------
+    // GATHER FORM VALUES (Updated for single name field)
+    // ------------------------------------------------------------
+    const name = document.getElementById("name").value.trim(); // Uses single 'name' field
+    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const garment_type = document.getElementById("garment_type").value;
+    const quality = document.getElementById("quality").value;
+    const colors = parseInt(document.getElementById("colors").value);
+    const quantity = parseInt(document.getElementById("quantity").value);
+    const deadline = document.getElementById("deadline").value || null;
+    const instructions = document.getElementById("instructions").value.trim();
+    const artFile = document.getElementById("artfile").files[0] || null;
 
-  // ------------------------------------------------------------
-  // 5A – INSERT QUOTE
-  // ------------------------------------------------------------
-  // Payload matches the clean new database table schema
-  const insertPayload = {
-    name,
-    email,
-    phone,
-    garment_type,
-    quality,
-    colors,
-    quantity,
-    deadline,
-    instructions,
-    created_at: new Date().toISOString()
-  };
-
-  console.log("DATA BEING INSERTED:", insertPayload);
-
-  const { data: quoteRow, error: insertError } = await supabase
-    .from("quotes")
-    .insert(insertPayload)
-    .select()
-    .single();
-
-  if (insertError) {
-    console.error("INSERT ERROR:", insertError);
-    // If this error persists, the RLS Policy (with check (true)) is still wrong.
-    status.innerText = "❌ Database error submitting your quote.";
-    return;
-  }
-
-  const quoteNumber = quoteRow.quote_number;
-  console.log("Assigned Quote Number:", quoteNumber);
-
-  // ------------------------------------------------------------
-  // 5B – BUILD FINAL FOLDER NAME (Updated to use combined name)
-  // ------------------------------------------------------------
-  const nameSlug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, "");
-  const folderName = `${quoteNumber}_${nameSlug}`;
-
-  // ------------------------------------------------------------
-  // 5C – CREATE FOLDER
-  // ------------------------------------------------------------
-  const placeholderBlob = new Blob(["keep"], { type: "text/plain" });
-  const placeholderPath = `${folderName}/.keep`;
-
-  const { error: placeholderError } = await supabase.storage
-    .from("quotes")
-    .upload(placeholderPath, placeholderBlob, { upsert: true });
-
-  if (placeholderError) {
-    console.error("FOLDER CREATE ERROR:", placeholderError);
-  }
-
-  // ------------------------------------------------------------
-  // 5D – UPLOAD ART FILE
-  // ------------------------------------------------------------
-  let stored_art_path = null;
-
-  if (artFile) {
-    const filePath = `${folderName}/${artFile.name}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("quotes")
-      .upload(filePath, artFile, { upsert: true });
-
-    if (uploadError) {
-      console.error("UPLOAD ERROR:", uploadError);
-      status.innerText = "❌ Error uploading artwork.";
+    // ------------------------------------------------------------
+    // VALIDATION FOR NOT NULL DB FIELDS (Updated for single name check)
+    // ------------------------------------------------------------
+    if (!name) {
+      status.innerText = "❌ Please enter your full name.";
       return;
     }
 
-    stored_art_path = filePath;
-  }
+    if (!email) {
+      status.innerText = "❌ Please enter an email address.";
+      return;
+    }
 
-  // ------------------------------------------------------------
-  // 5E – SAVE ART URL BACK TO QUOTE ROW
-  // ------------------------------------------------------------
-  const { error: updateError } = await supabase
-    .from("quotes")
-    .update({
-      art_url: stored_art_path
-    })
-    .eq("id", quoteRow.id);
+    // ------------------------------------------------------------
+    // 5A – INSERT QUOTE
+    // ------------------------------------------------------------
+    // Payload matches the clean new database table schema
+    const insertPayload = {
+      name,
+      email,
+      phone,
+      garment_type,
+      quality,
+      colors,
+      quantity,
+      deadline,
+      instructions,
+      created_at: new Date().toISOString()
+    };
 
-  if (updateError) {
-    console.error("UPDATE ERROR:", updateError);
-    status.innerText = "❌ Error saving file details.";
-    return;
-  }
+    console.log("DATA BEING INSERTED:", insertPayload);
 
-  // ------------------------------------------------------------
-  // 5F – DONE
-  // ------------------------------------------------------------
-  status.innerText = `✅ Quote #${quoteNumber} submitted successfully!`;
-  document.getElementById("quoteForm").reset();
-});
+    const { data: quoteRow, error: insertError } = await supabase
+      .from("quotes")
+      .insert(insertPayload)
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("INSERT ERROR:", insertError);
+      status.innerText = "❌ Database error submitting your quote.";
+      return;
+    }
+
+    const quoteNumber = quoteRow.quote_number;
+    console.log("Assigned Quote Number:", quoteNumber);
+
+    // ------------------------------------------------------------
+    // 5B – BUILD FINAL FOLDER NAME (Updated to use combined name)
+    // ------------------------------------------------------------
+    const nameSlug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, "");
+    const folderName = `${quoteNumber}_${nameSlug}`;
+
+    // ------------------------------------------------------------
+    // 5C – CREATE FOLDER
+    // ------------------------------------------------------------
+    const placeholderBlob = new Blob(["keep"], { type: "text/plain" });
+    const placeholderPath = `${folderName}/.keep`;
+
+    const { error: placeholderError } = await supabase.storage
+      .from("quotes")
+      .upload(placeholderPath, placeholderBlob, { upsert: true });
+
+    if (placeholderError) {
+      console.error("FOLDER CREATE ERROR:", placeholderError);
+    }
+
+    // ------------------------------------------------------------
+    // 5D – UPLOAD ART FILE
+    // ------------------------------------------------------------
+    let stored_art_path = null;
+
+    if (artFile) {
+      const filePath = `${folderName}/${artFile.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("quotes")
+        .upload(filePath, artFile, { upsert: true });
+
+      if (uploadError) {
+        console.error("UPLOAD ERROR:", uploadError);
+        status.innerText = "❌ Error uploading artwork.";
+        return;
+      }
+
+      stored_art_path = filePath;
+    }
+
+    // ------------------------------------------------------------
+    // 5E – SAVE ART URL BACK TO QUOTE ROW
+    // ------------------------------------------------------------
+    const { error: updateError } = await supabase
+      .from("quotes")
+      .update({
+        art_url: stored_art_path
+      })
+      .eq("id", quoteRow.id);
+
+    if (updateError) {
+      console.error("UPDATE ERROR:", updateError);
+      status.innerText = "❌ Error saving file details.";
+      return;
+    }
+
+    // ------------------------------------------------------------
+    // 5F – DONE
+    // ------------------------------------------------------------
+    status.innerText = `✅ Quote #${quoteNumber} submitted successfully!`;
+    document.getElementById("quoteForm").reset();
+  }); // End of form event listener
+}); // End of DOMContentLoaded listener
