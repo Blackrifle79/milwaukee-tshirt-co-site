@@ -7,7 +7,10 @@ async function verifyAuth() {
 
     const { data: { session } } = await window.client.auth.getSession();
 
-    if (!session) {
+    const currentPage = window.location.pathname;
+
+    // ❗ Prevent infinite redirect loop on login page
+    if (!session && !currentPage.includes("login.html")) {
         window.location.href = "login.html";
     }
 }
