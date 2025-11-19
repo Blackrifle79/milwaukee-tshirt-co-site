@@ -11,24 +11,31 @@
             color: white;
             padding: 20px;
         }
+
         .section {
             background: rgba(255,255,255,0.05);
             padding: 20px;
             border-radius: 6px;
             margin-bottom: 25px;
         }
+
         .field-row {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 6px;
+            padding-bottom: 5px;
         }
+
         .field-label {
             font-weight: bold;
             color: #8fe3ff;
         }
+
         .file-link {
             color: #ffd27f;
             text-decoration: none;
+        }
+        .file-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -37,7 +44,7 @@
 
 <h1>Ticket Details</h1>
 
-<div id="quoteData" class="section"></div>
+<div id="formData" class="section"></div>
 
 <h2>Uploaded Files</h2>
 <div id="fileList" class="section"></div>
@@ -47,7 +54,7 @@
 
 <script>
 async function loadTicket() {
-
+    // Wait for supabase client
     while (!window.client) {
         await new Promise(r => setTimeout(r, 10));
     }
@@ -55,52 +62,45 @@ async function loadTicket() {
     const params = new URLSearchParams(window.location.search);
     const folder = params.get("folder");
 
-    const quoteBox = document.getElementById("quoteData");
+    const formBox = document.getElementById("formData");
     const fileBox = document.getElementById("fileList");
 
     if (!folder) {
-        quoteBox.innerHTML = "Missing folder parameter.";
+        formBox.innerHTML = "Missing folder parameter.";
         return;
     }
 
-    const quoteNumber = Number(folder.split("_")[0]);
-    if (!quoteNumber) {
-        quoteBox.innerHTML = "Invalid folder format.";
-        return;
+    // --------------------------------------------
+    // 1️⃣ LOAD form.json FROM STORAGE
+    // --------------------------------------------
+    const { data: jsonFile, error: jsonErr } = await window.client.storage
+        .from("quotes_bucket")
+        .download(`${folder}/form.json`);
+
+    if (jsonErr) {
+        console.error("form.json missing:", jsonErr);
+        formBox.innerHTML = "<p>No form.json found.</p>";
+    } else {
+        const text = await jsonFile.text();
+        const formData = JSON.parse(text);
+
+        let html = "<h2>Form Submission</h2>";
+
+        for (const [key, value] of Object.entries(formData)) {
+            html += `
+                <div class="field-row">
+                    <span class="field-label">${key}:</span> ${value}
+                </div>
+            `;
+        }
+
+        formBox.innerHTML = html;
     }
 
-    // Fetch quote record
-    const { data: quote, error: qErr } = await window.client
-        .from("quotes")
-        .select("*")
-        .eq("quote_number", quoteNumber)
-        .maybeSingle();
-
-    if (qErr) {
-        console.error(qErr);
-        quoteBox.innerHTML = "Error loading quote data.";
-        return;
-    }
-
-    if (!quote) {
-        quoteBox.innerHTML = "No quote found.";
-        return;
-    }
-
-    // Render all DB fields dynamically
-    let fields = "";
-    for (const [key, value] of Object.entries(quote)) {
-        fields += `
-            <div class="field-row">
-                <span class="field-label">${key}:</span> ${value ?? ""}
-            </div>
-        `;
-    }
-    quoteBox.innerHTML = fields;
-
-    // Load files
-    const { data: files, error: fErr } = await window.client
-        .storage
+    // --------------------------------------------
+    // 2️⃣ LIST UPLOADED FILES IN FOLDER
+    // --------------------------------------------
+    const { data: files, error: fErr } = await window.client.storage
         .from("quotes_bucket")
         .list(folder);
 
@@ -115,18 +115,21 @@ async function loadTicket() {
         return;
     }
 
-    // Render file list
     let fileHTML = "";
     for (const file of files) {
-        const url = window.client.storage
+        if (file.name === "form.json") continue; // already displayed
+
+        const publicUrl = window.client.storage
             .from("quotes_bucket")
             .getPublicUrl(`${folder}/${file.name}`).data.publicUrl;
 
         fileHTML += `
             <div class="field-row">
-                <a class="file-link" href="${url}" target="_blank">${file.name}</a>
-            </div>`;
+                <a class="file-link" href="${publicUrl}" target="_blank">${file.name}</a>
+            </div>
+        `;
     }
+
     fileBox.innerHTML = fileHTML;
 }
 
