@@ -208,11 +208,12 @@ document.getElementById("filePicker").addEventListener("change", async (event) =
         .from("quotes_bucket")
         .upload(path, file, { upsert: true });
 
-    if (error) {
-        alert("Upload failed.");
-        console.error(error);
-        return;
-    }
+if (error) {
+    alert("Upload failed: " + JSON.stringify(error, null, 2));
+    console.error("UPLOAD ERROR:", error);
+    return;
+}
+
 
     // Refresh file list
     await loadTicket();
