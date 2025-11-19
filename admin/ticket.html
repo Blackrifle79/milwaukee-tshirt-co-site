@@ -172,11 +172,15 @@ async function loadTicket() {
             continue;
         }
 
-        fileHTML += `
-            <div class="field-row">
-                <a class="file-link" href="${signed.signedUrl}" target="_blank">${file.name}</a>
-            </div>
-        `;
+fileHTML += `
+    <div class="field-row" style="display:flex; justify-content:space-between; align-items:center;">
+        <a class="file-link" href="${signed.signedUrl}" target="_blank">${file.name}</a>
+        <button class="delete-btn" data-filename="${file.name}" style="background:red;color:white;border:0;padding:6px 10px;cursor:pointer;">
+            Delete
+        </button>
+    </div>
+`;
+
     }
 
     fileBox.innerHTML = fileHTML;
