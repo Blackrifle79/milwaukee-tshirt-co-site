@@ -24,7 +24,8 @@ html {
 }
 
 body {
-  background: var(--dark) url('assets/background.png') repeat;
+  background: var(--dark) url('/assets/background.png') repeat;
+
   background-size: auto;
   color: var(--white);
   line-height: 1.5;

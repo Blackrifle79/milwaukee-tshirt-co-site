@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Admin Dashboard</title>
+
+    <!-- Load main site styles -->
+    <link rel="stylesheet" href="../styles.css">
+
+    <style>
+        body {
+            background: var(--dark) url('/assets/background.png') repeat !important;
+        }
+        #ticketList ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        #ticketList li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+<h1 style="color:white;">Dashboard</h1>
+
+<h2 style="color:white;">Tickets</h2>
+<div id="ticketList" style="color:white; padding:20px;"></div>
+
+<!-- Supabase UMD -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+
+<!-- Config + Auth -->
+<script src="js/supabase.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+async function loadTickets() {
+    // Use the global `supabase` instance created in supabase.js
+    if (!window.client) {
+        console.error("❌ Supabase client not found. Check supabase.js");
+        document.getElementById("ticketList").innerHTML = "Supabase not initialized.";
+        return;
+    }
+
+    const bucket = "quotes_bucket";
+
+    const { data, error } = await window.client
+        .storage
+        .from(bucket)
+        .list("", {
+            limit: 1000,
+            offset: 0,
+            sortBy: { column: "name", order: "asc" }
+        });
+
+    if (error) {
+        console.error("Error loading folders:", error);
+        document.getElementById("ticketList").innerHTML = "Error loading tickets.";
+        return;
+    }
+
+    const folders = data.filter(item => item.id === null);
+
+    if (folders.length === 0) {
+        document.getElementById("ticketList").innerHTML = "No tickets found.";
+        return;
+    }
+
+    let html = "<ul>";
+    folders.forEach(folder => {
+        html += `<li>${folder.name}</li>`;
+    });
+    html += "</ul>";
+
+    document.getElementById("ticketList").innerHTML = html;
+}
+
+// Delay until supabase.js finishes creating the client
+window.addEventListener("DOMContentLoaded", loadTickets);
+</script>
+
+</body>
+</html>
