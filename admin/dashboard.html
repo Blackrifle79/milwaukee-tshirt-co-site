@@ -33,41 +33,46 @@
 <h1 style="color:white;">Dashboard</h1>
 
 <h2 style="color:white;">Tickets</h2>
-<div id="tickets" style="color:white; padding:20px;"></div> 
+<div id="tickets" style="color:white; padding:20px;"></div>
 
 <h2 style="color:white;">Recent Quotes</h2>
-<div id="quotes" style="color:white; padding:20px;"></div> 
+<div id="quotes" style="color:white; padding:20px;"></div>
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 
-<!-- Admin Scripts -->
+<!-- Global config + auth -->
 <script defer src="/admin/js/supabase.js"></script>
 <script defer src="/admin/js/auth.js"></script>
 
-<!-- Dashboard Logic -->
+<!-- DASHBOARD LOGIC (Inline, authoritative) -->
 <script>
-async function loadTickets() {
-    // Wait for Supabase client
+async function loadDashboard() {
+    // Wait until Supabase client is ready
     while (!window.client) {
         await new Promise(r => setTimeout(r, 10));
     }
 
     const bucket = "quotes_bucket";
 
-    const { data, error } = await window.client.storage
+    // Fetch contents of bucket root
+    const { data, error } = await window.client
+        .storage
         .from(bucket)
         .list("", {
             limit: 1000,
             sortBy: { column: "name", order: "asc" }
         });
 
+    const ticketDiv = document.getElementById("tickets");
+
     if (error) {
-        document.getElementById("tickets").innerHTML = "Error loading tickets.";
+        console.error("Storage error:", error);
+        ticketDiv.innerHTML = "<p>Error loading ticket folders.</p>";
         return;
     }
 
-    // Allow all Supabase folder types
+    // Filter ONLY directories
     const folders = data.filter(item =>
         item.type === "dir" ||
         item.type === "folder" ||
@@ -75,26 +80,27 @@ async function loadTickets() {
     );
 
     if (folders.length === 0) {
-        document.getElementById("tickets").innerHTML = "No tickets found.";
+        ticketDiv.innerHTML = "<p>No tickets found.</p>";
         return;
     }
 
     let html = "<ul>";
-    folders.forEach(folder => {
+    folders.forEach(f => {
         html += `
             <li>
-                <a class="ticket-link" href="/admin/ticket.html?folder=${encodeURIComponent(folder.name)}">
-                    ${folder.name}
+                <a class="ticket-link" href="/admin/ticket.html?folder=${encodeURIComponent(f.name)}">
+                    ${f.name}
                 </a>
-            </li>`;
+            </li>
+        `;
     });
     html += "</ul>";
 
-    document.getElementById("tickets").innerHTML = html;
+    ticketDiv.innerHTML = html;
 }
 
-// Load dashboard content
-document.addEventListener("DOMContentLoaded", loadTickets);
+// Initialize dashboard
+document.addEventListener("DOMContentLoaded", loadDashboard);
 </script>
 
 </body>
