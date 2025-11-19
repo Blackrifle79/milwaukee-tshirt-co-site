@@ -155,25 +155,31 @@ async function loadTicket() {
         return;
     }
 
-    let fileHTML = "";
-    for (const file of files) {
-        if (file.name === "form.json" || file.name === ".keep") continue;
+let fileHTML = "";
+for (const file of files) {
+    if (file.name === "form.json" || file.name === ".keep") continue;
 
-        // ⭐ FIXED PUBLIC URL HANDLING
-        const { data: urlData } = window.client.storage
-            .from("quotes_bucket")
-            .getPublicUrl(`${folder}/${file.name}`);
+    // ⭐ FIXED: Signed URL for private bucket
+    const { data: signed, error: signedErr } = await window.client.storage
+        .from("quotes_bucket")
+        .createSignedUrl(`${folder}/${file.name}`, 3600); // 1 hour
 
-        const publicUrl = urlData.publicUrl;
-
-        fileHTML += `
-            <div class="field-row">
-                <a class="file-link" href="${publicUrl}" target="_blank">${file.name}</a>
-            </div>
-        `;
+    if (signedErr) {
+        console.error("Signed URL error:", signedErr);
+        continue;
     }
 
-    fileBox.innerHTML = fileHTML;
+    const publicUrl = signed.signedUrl;
+
+    fileHTML += `
+        <div class="field-row">
+            <a class="file-link" href="${publicUrl}" target="_blank">${file.name}</a>
+        </div>
+    `;
+}
+
+fileBox.innerHTML = fileHTML;
+
 }
 
 document.addEventListener("DOMContentLoaded", loadTicket);
