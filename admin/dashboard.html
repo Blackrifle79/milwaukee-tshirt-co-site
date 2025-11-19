@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <title>Admin Dashboard</title>
 
-    <!-- Load main site styles -->
     <link rel="stylesheet" href="/styles.css">
 
     <style>
@@ -27,61 +26,16 @@
 <h1 style="color:white;">Dashboard</h1>
 
 <h2 style="color:white;">Tickets</h2>
-<div id="ticketList" style="color:white; padding:20px;"></div>
+<div id="tickets" style="color:white; padding:20px;"></div> 
 
-<!-- Supabase UMD (LOADS FIRST — NO DEFER) -->
+<h2 style="color:white;">Recent Quotes</h2>
+<div id="quotes" style="color:white; padding:20px;"></div> 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 
-<!-- Config + Auth (DEFER so they wait until Supabase is ready) -->
 <script defer src="/admin/js/supabase.js"></script>
 <script defer src="/admin/js/auth.js"></script>
-
-<script>
-async function loadTickets() {
-
-    // Wait until the client exists
-    while (!window.client) {
-        await new Promise(r => setTimeout(r, 10));
-    }
-
-    const bucket = "quotes_bucket";
-
-    const { data, error } = await window.client
-        .storage
-        .from(bucket)
-        .list("", {
-            limit: 1000,
-            offset: 0,
-            sortBy: { column: "name", order: "asc" }
-        });
-
-    if (error) {
-        console.error("Error loading folders:", error);
-        document.getElementById("ticketList").innerHTML = "Error loading tickets.";
-        return;
-    }
-
-const folders = data.filter(item => item.type === "dir");
-
-
-
-    if (folders.length === 0) {
-        document.getElementById("ticketList").innerHTML = "No tickets found.";
-        return;
-    }
-
-    let html = "<ul>";
-    folders.forEach(folder => {
-        html += `<li>${folder.name}</li>`;
-    });
-    html += "</ul>";
-
-    document.getElementById("ticketList").innerHTML = html;
-}
-
-// Run when page ready
-window.addEventListener("DOMContentLoaded", loadTickets);
-</script>
+<script defer src="/admin/js/dashboard.js"></script> 
 
 </body>
 </html>
