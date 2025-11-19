@@ -12,7 +12,6 @@
             color: white;
         }
 
-        /* --- MODULAR TILE LAYOUT --- */
         .dashboard-container {
             max-width: 1100px;
             margin: 40px auto;
@@ -40,33 +39,6 @@
             background: rgba(255,255,255,0.16);
             border-color: rgba(255,255,255,0.25);
         }
-
-        /* --- TICKET LIST --- */
-        #tickets ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        #tickets li {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-
-        a.ticket-link {
-            color: white;
-            text-decoration: none;
-        }
-
-        a.ticket-link:hover {
-            text-decoration: underline;
-        }
-
-        /* --- MOBILE --- */
-        @media (max-width: 600px) {
-            .dashboard-card {
-                padding: 18px;
-            }
-        }
     </style>
 </head>
 
@@ -76,10 +48,10 @@
 
     <h1>Dashboard</h1>
 
-    <!-- MODULAR GRID -->
     <div class="dashboard-grid">
 
-        <div class="dashboard-card" onclick="scrollToTickets()">
+        <!-- NOW GOES TO tickets.html -->
+        <div class="dashboard-card" onclick="window.location.href='/admin/tickets.html'">
             <h3>Tickets</h3>
             <p>View and manage customer quotes.</p>
         </div>
@@ -101,74 +73,13 @@
 
     </div>
 
-    <!-- TICKET LIST -->
-    <h2>Tickets</h2>
-    <div id="tickets" style="padding: 20px;">Loading tickets…</div>
-
 </div>
 
 <!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- Config + Auth Guard -->
 <script defer src="/admin/js/supabase.js"></script>
 <script defer src="/admin/js/auth.js"></script>
-
-<!-- WORKING TICKET LOADER — UNCHANGED -->
-<script>
-async function loadDashboard() {
-    while (!window.client) {
-        await new Promise(r => setTimeout(r, 10));
-    }
-
-    const bucket = "quotes_bucket";
-
-    const { data, error } = await window.client
-        .storage
-        .from(bucket)
-        .list("", {
-            limit: 1000,
-            sortBy: { column: "name", order: "asc" }
-        });
-
-    const ticketDiv = document.getElementById("tickets");
-
-    if (error) {
-        console.error("Storage error:", error);
-        ticketDiv.innerHTML = "<p>Error loading ticket folders.</p>";
-        return;
-    }
-
-    // WORKING FILTER – preserved exactly
-    const folders = data.filter(item => item.id === null);
-
-    if (folders.length === 0) {
-        ticketDiv.innerHTML = "<p>No tickets found.</p>";
-        return;
-    }
-
-    let html = "<ul>";
-    folders.forEach(f => {
-        html += `
-            <li>
-                <a class="ticket-link" href="/admin/ticket.html?folder=${encodeURIComponent(f.name)}">
-                    ${f.name}
-                </a>
-            </li>
-        `;
-    });
-    html += "</ul>";
-
-    ticketDiv.innerHTML = html;
-}
-
-// Scroll helper for the tile
-function scrollToTickets() {
-    document.getElementById("tickets").scrollIntoView({ behavior: "smooth" });
-}
-
-document.addEventListener("DOMContentLoaded", loadDashboard);
-</script>
 
 </body>
 </html>

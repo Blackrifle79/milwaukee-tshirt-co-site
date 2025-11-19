@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Tickets</title>
+
+    <link rel="stylesheet" href="/styles.css">
+
+    <style>
+        body {
+            background: var(--dark) url('/assets/background.png') repeat !important;
+            color: white;
+        }
+
+        .tickets-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        /* Tile Grid */
+        .ticket-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        /* Ticket Tile */
+        .ticket-tile {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 22px;
+            text-align: center;
+            backdrop-filter: blur(6px);
+            cursor: pointer;
+            transition: 0.2s ease;
+            color: white;
+        }
+
+        .ticket-tile:hover {
+            background: rgba(255,255,255,0.16);
+            border-color: rgba(255,255,255,0.25);
+        }
+
+        .loading-message {
+            margin-top: 20px;
+            font-size: 16px;
+            opacity: 0.85;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="tickets-container">
+    <h1>Tickets</h1>
+
+    <div id="ticketGrid" class="ticket-grid"></div>
+
+    <div id="loading" class="loading-message">Loading tickets…</div>
+</div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="/admin/js/supabase.js"></script>
+<script defer src="/admin/js/auth.js"></script>
+
+<script>
+async function loadTickets() {
+
+    // Wait until client is ready
+    while (!window.client) {
+        await new Promise(r => setTimeout(r, 10));
+    }
+
+    const grid = document.getElementById("ticketGrid");
+    const loading = document.getElementById("loading");
+
+    loading.innerText = "Loading tickets…";
+
+    const { data, error } = await window.client
+        .storage
+        .from("quotes_bucket")
+        .list("", { limit: 1000 });
+
+    if (error) {
+        console.error(error);
+        loading.innerText = "Error loading tickets.";
+        return;
+    }
+
+    // Supabase folder = item.id === null
+    const folders = data.filter(item => item.id === null);
+
+    if (folders.length === 0) {
+        loading.innerText = "No tickets found.";
+        return;
+    }
+
+    loading.style.display = "none";
+
+    // Build tiles
+    folders.forEach(folder => {
+        const tile = document.createElement("div");
+        tile.className = "ticket-tile";
+        tile.innerText = folder.name;
+
+        tile.onclick = () => {
+            window.location.href = `/admin/ticket.html?folder=${encodeURIComponent(folder.name)}`;
+        };
+
+        grid.appendChild(tile);
+    });
+}
+
+// Start
+document.addEventListener("DOMContentLoaded", loadTickets);
+</script>
+
+</body>
+</html>
