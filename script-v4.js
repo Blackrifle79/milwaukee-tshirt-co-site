@@ -57,7 +57,7 @@ async function loadGarments() {
 }
 
 // ------------------------------------------------------------
-// 4. PAGE LOAD & FORM INITIALIZATION
+// 4. QUOTE FORM HANDLING
 // ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   loadGarments();
@@ -165,38 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ------------------------------------------------------------
-  // 6. CONTACT FORM HANDLER (FIXED)
+  // ❌ CONTACT FORM: REMOVED COMPLETELY
+  // Netlify handles it automatically. No JS should touch it.
   // ------------------------------------------------------------
-  document.getElementById("contactForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const form = new FormData(e.target);
-
-    const payload = {
-      name: form.get("name"),
-      email: form.get("email"),
-      message: form.get("message")
-    };
-
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        "contact-email",
-        { body: payload }
-      );
-
-      if (error) {
-        console.error("Contact form error:", error);
-        alert("There was a problem sending your message.");
-        return;
-      }
-
-      alert("Message sent! Thank you.");
-      e.target.reset();
-
-    } catch (err) {
-      alert("Network error sending your message.");
-      console.error("Contact form network error:", err);
-    }
-  });
-
 });
