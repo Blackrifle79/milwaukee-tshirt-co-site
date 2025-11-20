@@ -171,9 +171,15 @@ async function generatePDF() {
 
     let filename = `${folder}/quote.pdf`;
 
+    /* ---------------------------------------------------------
+       FIXED: Proper PDF upload with contentType
+    --------------------------------------------------------- */
     const { error } = await window.client.storage
         .from("quotes_bucket")
-        .upload(filename, pdfData, { upsert: true });
+        .upload(filename, pdfData, {
+            upsert: true,
+            contentType: "application/pdf"
+        });
 
     if (error) {
         alert("Upload failed");
