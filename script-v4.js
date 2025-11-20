@@ -173,12 +173,12 @@ document.addEventListener("DOMContentLoaded", () => {
         { upsert: true }
       );
 
-      await supabase
-        .from("quotes")
-        .update({ art_url: stored_art_path })
-        .eq("id", quoteRow.id);
+await supabase
+  .from("quotes")
+  .update({ art_url: stored_art_path })
+  .eq("id", quoteRow.id);
 
-      status.innerText = `✅ Quote #${quoteNumber} submitted successfully!`;
-      document.getElementById("quoteForm").reset();
+window.location.href = "quote_landing.html";
+
     });
 });

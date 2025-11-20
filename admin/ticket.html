@@ -3,15 +3,17 @@
 <head>
     <meta charset="utf-8" />
     <title>Ticket</title>
+
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/admin/admin.css">
 
     <style>
+        /* Page wrapper */
         body {
             background: var(--dark) url('/assets/background.png') repeat !important;
-            color: white;
+            color: var(--admin-text);
             padding: 30px;
-            padding-bottom: 110px; /* Room for bottom bar */
-            font-family: sans-serif;
+            padding-bottom: 120px;
         }
 
         .page-container {
@@ -19,54 +21,48 @@
             margin: 0 auto;
         }
 
+        /* Title */
         h1 {
             margin-bottom: 25px;
-            font-size: 32px;
-            color: #ffffff;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--white);
         }
 
-        .card {
-            background: rgba(255,255,255,0.06);
+        /* TICKET VIEW CARDS */
+        .ticket-details-card {
             padding: 22px;
-            border-radius: 8px;
+            background: var(--admin-card-bg);
+            border: 1px solid var(--admin-border);
+            border-radius: 0px;
             margin-bottom: 28px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.25);
+            backdrop-filter: blur(6px);
         }
 
-        .card h2 {
-            margin-top: 0;
+        .ticket-details-card h2 {
+            color: var(--admin-heading);
             margin-bottom: 15px;
-            font-size: 22px;
-            color: #8fe3ff;
+            font-size: 20px;
+            font-weight: 600;
         }
 
         .field-row {
             padding: 10px 0;
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .field-label {
+            color: var(--admin-heading);
             font-weight: bold;
-            color: #8fe3ff;
         }
 
-        /* Improve readability inside formData card */
-        #formData.card,
-        #formData.card *,
-        #formData .card,
-        #formData .card * {
-            color: #e6e6e6 !important;
-        }
-
-        #formData.card .field-label,
-        #formData .card .field-label {
-            color: #8fe3ff !important;
-            font-weight: bold;
+        /* File List */
+        .file-row {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .file-link {
@@ -80,48 +76,45 @@
         }
 
         .delete-btn {
-            background: #BA3B46;
-            color: white;
+            background: var(--danger);
             border: none;
             padding: 6px 12px;
             font-size: 14px;
             cursor: pointer;
-            border-radius: 4px;
+            border-radius: 0;
+            color: white;
         }
 
         .delete-btn:hover {
-            background: #d44752;
+            background: var(--danger-hover);
         }
 
-        /* Bottom bar */
-        .ticket-action-bar {
+        /* FLOATING BUTTONS */
+        .ticket-float-buttons {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(0,0,0,0.65);
-            backdrop-filter: blur(6px);
-            border-top: 1px solid rgba(255,255,255,0.15);
-            padding: 14px 20px;
+            bottom: 20px;
+            right: 20px;
             display: flex;
-            gap: 16px;
-            justify-content: center;
-            z-index: 9999;
+            flex-direction: row;
+            gap: 12px;
+            z-index: 1000;
         }
 
-        .ticket-action-bar button {
-            background: rgba(255,255,255,0.85);
-            color: var(--dark);
-            border: 1px solid var(--light-grey);
+        .ticket-float-buttons a {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
             padding: 12px 22px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 4px;
-            cursor: pointer;
+            text-decoration: none;
+            color: var(--admin-text);
+            font-size: 15px;
+            border-radius: 0;
+            transition: 0.2s;
+            backdrop-filter: blur(6px);
         }
 
-        .ticket-action-bar button:hover {
-            background: white;
+        .ticket-float-buttons a:hover {
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(255,255,255,0.22);
         }
     </style>
 </head>
@@ -131,9 +124,9 @@
 
     <h1>Ticket Details</h1>
 
-    <div id="formData" class="card"></div>
+    <div id="formData" class="ticket-details-card"></div>
 
-    <div class="card">
+    <div class="ticket-details-card">
         <h2>Uploaded Files</h2>
         <div id="fileList"></div>
     </div>
@@ -142,20 +135,20 @@
 
 <input type="file" id="filePicker" style="display:none;" />
 
-<!-- Bottom Action Bar -->
-<div class="ticket-action-bar">
-    <button id="createQuoteBtn">Create Quote</button>
-    <button>Request Payment</button>
-    <button id="uploadBtn">Upload File</button>
+<!-- FLOATING BUTTONS -->
+<div class="ticket-float-buttons">
+    <a href="#" id="createQuoteBtn">Create Quote</a>
+    <a href="#" id="uploadBtn">Upload File</a>
 </div>
 
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
 <script defer src="/admin/js/supabase.js"></script>
 
 <script>
-/* ---------------------------------------------------------
-   LOAD TICKET INFO
---------------------------------------------------------- */
+/* ---------------------------------------------
+   LOAD TICKET DATA
+--------------------------------------------- */
 async function loadTicket() {
     while (!window.client) await new Promise(r => setTimeout(r, 10));
 
@@ -171,36 +164,29 @@ async function loadTicket() {
     }
 
     // Load form.json
-    const { data: jsonFile, error: jsonErr } = await window.client.storage
+    const { data: jsonFile } = await window.client.storage
         .from("quotes_bucket")
         .download(`${folder}/form.json`);
 
-    if (jsonErr) {
+    if (!jsonFile) {
         formBox.innerHTML = "<p>No form.json found.</p>";
     } else {
-        const text = await jsonFile.text();
-        const formData = JSON.parse(text);
+        const formData = JSON.parse(await jsonFile.text());
 
-        let html = `<h2>Form Submission</h2>`;
+        let html = "<h2>Form Submission</h2>";
         for (const [key, value] of Object.entries(formData)) {
             html += `
                 <div class="field-row">
-                    <div><span class="field-label">${key}:</span> ${value}</div>
-                </div>
-            `;
+                    <span class="field-label">${key}:</span> ${value}
+                </div>`;
         }
-        formBox.innerHTML = '<div class="card">' + html + '</div>';
+        formBox.innerHTML = html;
     }
 
     // Load uploaded files
-    const { data: files, error: fErr } = await window.client.storage
+    const { data: files } = await window.client.storage
         .from("quotes_bucket")
         .list(folder);
-
-    if (fErr) {
-        fileBox.innerHTML = "<p>Error loading files.</p>";
-        return;
-    }
 
     if (!files || files.length === 0) {
         fileBox.innerHTML = "<p>No uploaded files.</p>";
@@ -209,26 +195,25 @@ async function loadTicket() {
 
     let fileHTML = "";
     for (const file of files) {
-        if (file.name === "form.json" || file.name === ".keep") continue;
+        if (file.name === "form.json") continue;
 
         const { data: signed } = await window.client.storage
             .from("quotes_bucket")
             .createSignedUrl(`${folder}/${file.name}`, 3600);
 
         fileHTML += `
-            <div class="field-row">
+            <div class="file-row">
                 <a class="file-link" href="${signed.signedUrl}" target="_blank">${file.name}</a>
                 <button class="delete-btn" data-filename="${file.name}">Delete</button>
-            </div>
-        `;
+            </div>`;
     }
 
     fileBox.innerHTML = fileHTML;
 }
 
-/* ---------------------------------------------------------
+/* ---------------------------------------------
    UPLOAD FILE
---------------------------------------------------------- */
+--------------------------------------------- */
 document.getElementById("uploadBtn").addEventListener("click", () => {
     document.getElementById("filePicker").click();
 });
@@ -237,69 +222,43 @@ document.getElementById("filePicker").addEventListener("change", async (event) =
     const file = event.target.files[0];
     if (!file) return;
 
-    while (!window.client) await new Promise(r => setTimeout(r, 10));
-
     const params = new URLSearchParams(window.location.search);
     const folder = params.get("folder");
-    const path = `${folder}/${file.name}`;
 
-    const { error } = await window.client.storage
+    await window.client.storage
         .from("quotes_bucket")
-        .upload(path, file, { upsert: true });
+        .upload(`${folder}/${file.name}`, file, { upsert: true });
 
-    if (error) {
-        alert("Upload failed.");
-        return;
-    }
-
-    await loadTicket();
+    loadTicket();
 });
 
-/* ---------------------------------------------------------
+/* ---------------------------------------------
    DELETE FILE
---------------------------------------------------------- */
-document.addEventListener("click", async (event) => {
-    if (!event.target.classList.contains("delete-btn")) return;
+--------------------------------------------- */
+document.addEventListener("click", async (e) => {
+    if (!e.target.classList.contains("delete-btn")) return;
 
-    const filename = event.target.dataset.filename;
-    if (!confirm(`Delete "${filename}"?`)) return;
-
+    const filename = e.target.dataset.filename;
     const params = new URLSearchParams(window.location.search);
     const folder = params.get("folder");
-    const fullPath = `${folder}/${filename}`;
 
-    while (!window.client) await new Promise(r => setTimeout(r, 10));
-
-    const { error } = await window.client.storage
+    await window.client.storage
         .from("quotes_bucket")
-        .remove([fullPath]);
+        .remove([`${folder}/${filename}`]);
 
-    if (error) {
-        alert("Delete failed.");
-        return;
-    }
-
-    await loadTicket();
+    loadTicket();
 });
 
-/* ---------------------------------------------------------
-   CREATE QUOTE — redirect
---------------------------------------------------------- */
+/* ---------------------------------------------
+   CREATE QUOTE REDIRECT
+--------------------------------------------- */
 document.getElementById("createQuoteBtn").addEventListener("click", () => {
-    const params = new URLSearchParams(window.location.search);
-    const folder = params.get("folder");
-
-    if (!folder) {
-        alert("Missing folder.");
-        return;
-    }
-
+    const folder = new URLSearchParams(window.location.search).get("folder");
     window.location.href = `/admin/create_quote.html?folder=${folder}`;
 });
 
 document.addEventListener("DOMContentLoaded", loadTicket);
 </script>
-<script src="/admin/js/admin_menu.js"></script>
 
 </body>
 </html>

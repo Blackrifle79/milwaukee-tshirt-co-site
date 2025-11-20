@@ -60,35 +60,84 @@
 
 <!-- WELCOME SECTION -->
 <section id="welcome" class="welcome-section">
-
     <h2>Welcome to Milwaukee T-Shirt Co.</h2>
 
     <div class="welcome-container">
-
         <div class="card welcome-card">
-            <p>
-                We’re a local, family-run print shop specializing in high-quality custom apparel 
-                for teams, schools, small businesses, and events of every size. Whether you need 
-                12 shirts or 1,200, we make the process fast, simple, and hands-on from your 
-                first message to your final delivery.
-            </p>
+<p>
+    Since 2013, we’ve been helping teams, schools, small businesses, and events create premium custom apparel with 
+    fast turnarounds, competitive pricing, and free artwork assistance. Whether you need a small run or a large order, 
+    we make the process simple from start to finish.  
+    <a href="#quote" style="color:#8fe3ff; text-decoration:underline;">Fill out the quote form below</a> to get started.
+</p>
+
         </div>
 
         <div class="welcome-images">
             <img src="assets/product/CUMC.jpg" alt="">
             <img src="assets/product/tip-top-hat.jpg" alt="">
         </div>
-
     </div>
-
 </section>
 
 <!-- QUOTE FORM -->
+<section id="quote">
+    <h2>Get a Quick Quote</h2>
+
+    <div class="card">
+        <form id="quoteForm" autocomplete="off" enctype="multipart/form-data" onsubmit="return false;">
+
+            <label>Your Full Name</label>
+            <input type="text" id="name" required>
+
+            <label>Email Address</label>
+            <input type="email" id="email" required>
+
+            <label>Phone Number</label>
+            <input type="text" id="phone">
+
+            <label>Garment Type</label>
+            <select id="garment_type" required>
+                <option value="">Loading garment types...</option>
+            </select>
+
+            <label>Garment Quality</label>
+            <select id="quality" required>
+                <option value="">Select quality...</option>
+                <option value="budget">Budget</option>
+                <option value="standard">Standard</option>
+                <option value="premium">Premium</option>
+            </select>
+
+            <label>Number of Print Colors</label>
+            <input type="number" id="colors" required min="1">
+
+            <label>Quantity Needed</label>
+            <input type="number" id="quantity" required min="1">
+
+            <label>Deadline (Optional)</label>
+            <input type="date" id="deadline">
+
+            <label>Special Instructions</label>
+            <textarea id="instructions"></textarea>
+
+            <label>Upload Artwork (Optional)</label>
+            <input type="file" id="artfile" accept="image/*,.pdf">
+
+            <button type="submit">Submit Quote Request</button>
+        </form>
+
+        <p id="quoteStatus" style="margin-top:10px;"></p>
+    </div>
+</section>
+
+
 <section id="contact">
     <h2>Contact Us</h2>
 
     <div class="card">
-        <form id="contactForm" onsubmit="return false;">
+        <form action="send_contact.php" method="POST">
+            
             <label>Your Name</label>
             <input type="text" name="name" required>
 
@@ -103,30 +152,9 @@
     </div>
 </section>
 
-<!-- CONTACT -->
-<section id="contact">
-    <h2>Contact Us</h2>
-    <div class="card">
 
-        <!-- ✅ Netlify-powered form — no JS, no Supabase -->
-<form name="contact" method="POST" data-netlify="true" action="/thanks.html">
-    <input type="hidden" name="form-name" value="contact">
-
-    <input type="text" name="name" placeholder="Your Name" required>
-    <input type="email" name="email" placeholder="Your Email" required>
-    <textarea name="message" placeholder="Your Message" required></textarea>
-
-    <button type="submit">Send Message</button>
-</form>
-
-
-    </div>
-</section>
-
-<!-- Load Supabase FIRST -->
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Then your app logic -->
 <script src="script-v4.js?v=10001"></script>
 
 </body>

@@ -5,95 +5,137 @@
     <title>Tickets</title>
 
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/admin/admin.css">
 
     <style>
-        body {
-            background: var(--dark) url('/assets/background.png') repeat !important;
-            color: white;
-        }
-
+        /* Page Layout */
         .tickets-container {
             max-width: 1100px;
             margin: 40px auto;
-            padding: 20px;
+            padding: 0 20px;
         }
 
-        h1 {
-            margin-bottom: 25px;
-        }
-
-        /* Tile Grid */
+        /* Grid */
         .ticket-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 18px;
+            gap: 20px;
         }
 
-        /* Ticket Tile */
+        /* Ticket Tile (inherits admin.css card look) */
         .ticket-tile {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: var(--admin-card-bg);
+            border: 1px solid var(--admin-border);
             padding: 22px;
             text-align: center;
             backdrop-filter: blur(6px);
+            color: var(--admin-text);
             cursor: pointer;
+            position: relative;
             transition: 0.2s ease;
-            color: white;
         }
 
         .ticket-tile:hover {
-            background: rgba(255,255,255,0.16);
-            border-color: rgba(255,255,255,0.25);
+            background: var(--admin-card-bg-hover);
+            border-color: var(--admin-border-hover);
+        }
+
+        /* Improved delete button (matches design system) */
+        .delete-ticket-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #8fe3ff;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 26px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: 0.2s ease;
+            z-index: 5;
+        }
+
+        .delete-ticket-btn:hover {
+            background: rgba(0,0,0,0.85);
+            border-color: rgba(255,255,255,0.32);
+            color: white;
         }
 
         .loading-message {
             margin-top: 20px;
             font-size: 16px;
             opacity: 0.85;
+            text-align: center;
         }
+
     </style>
 </head>
 
 <body>
 
-<div class="tickets-container">
-    <h1>Tickets</h1>
-
-    <div id="ticketGrid" class="ticket-grid"></div>
-
-    <div id="loading" class="loading-message">Loading tickets…</div>
+<!-- Floating Buttons -->
+<div class="admin-float-buttons">
+    <a href="/admin/dashboard.html">Dashboard</a>
+    <a href="/admin/login.html" onclick="logout()">Logout</a>
 </div>
 
-<!-- Supabase SDK -->
+<div class="tickets-container">
+
+    <div id="ticketGrid" class="ticket-grid"></div>
+    <div id="loading" class="loading-message">Loading tickets…</div>
+
+</div>
+
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="/admin/js/supabase.js"></script>
 <script defer src="/admin/js/auth.js"></script>
 
 <script>
-async function loadTickets() {
+function logout() {
+    localStorage.removeItem("supabase.auth.token");
+}
 
-    // Wait until client is ready
-    while (!window.client) {
-        await new Promise(r => setTimeout(r, 10));
+/* DELETE A TICKET */
+async function deleteTicket(folderName, tileElement) {
+    if (!confirm(`Delete ticket "${folderName}"?\n\nThis cannot be undone.`)) return;
+
+    // List all items in folder
+    const { data: objects } = await window.client
+        .storage
+        .from("quotes_bucket")
+        .list(folderName, { limit: 1000 });
+
+    const paths = objects.map(o => `${folderName}/${o.name}`);
+
+    if (paths.length > 0) {
+        await window.client.storage.from("quotes_bucket").remove(paths);
     }
+
+    // Remove the folder itself
+    await window.client.storage.from("quotes_bucket").remove([folderName]);
+
+    // Remove tile from UI
+    tileElement.remove();
+}
+
+/* LOAD TICKETS */
+async function loadTickets() {
+    while (!window.client) await new Promise(r => setTimeout(r, 20));
 
     const grid = document.getElementById("ticketGrid");
     const loading = document.getElementById("loading");
 
-    loading.innerText = "Loading tickets…";
-
-    const { data, error } = await window.client
+    const { data } = await window.client
         .storage
         .from("quotes_bucket")
         .list("", { limit: 1000 });
 
-    if (error) {
-        console.error(error);
-        loading.innerText = "Error loading tickets.";
-        return;
-    }
-
-    // Supabase folder = item.id === null
     const folders = data.filter(item => item.id === null);
 
     if (folders.length === 0) {
@@ -103,24 +145,31 @@ async function loadTickets() {
 
     loading.style.display = "none";
 
-    // Build tiles
     folders.forEach(folder => {
         const tile = document.createElement("div");
         tile.className = "ticket-tile";
-        tile.innerText = folder.name;
 
-        tile.onclick = () => {
-            window.location.href = `/admin/ticket.html?folder=${encodeURIComponent(folder.name)}`;
+        tile.innerHTML = `
+            <div class="delete-ticket-btn">×</div>
+            ${folder.name}
+        `;
+
+        tile.onclick = (e) => {
+            if (e.target.classList.contains("delete-ticket-btn")) return;
+            window.location.href = "/admin/ticket.html?folder=" + encodeURIComponent(folder.name);
+        };
+
+        tile.querySelector(".delete-ticket-btn").onclick = (e) => {
+            e.stopPropagation();
+            deleteTicket(folder.name, tile);
         };
 
         grid.appendChild(tile);
     });
 }
 
-// Start
 document.addEventListener("DOMContentLoaded", loadTickets);
 </script>
-<script src="/admin/js/admin_menu.js"></script>
 
 </body>
 </html>

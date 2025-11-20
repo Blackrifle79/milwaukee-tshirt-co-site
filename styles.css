@@ -9,8 +9,11 @@ html {
   --dark: #232323;
   --white: #ffffff;
   --light-grey: #b0b0b0;
-  --off-white: rgba(255, 255, 255, 0.85);
+  --off-white: rgba(255, 255, 255, 0.65);
   --white-overlay: rgba(255, 255, 255, 0.1);
+
+  /* NEW ACCENT COLOR */
+  --accent-blue: #8fe3ff;
 }
 
 /* =================================================================== */
@@ -66,6 +69,9 @@ section {
 h1, h2, h3 {
   margin-bottom: 20px;
   font-weight: 600;
+}
+h2 {
+  font-size: 28px;
 }
 
 /* =================================================================== */
@@ -182,79 +188,82 @@ nav {
 }
 
 /* =================================================================== */
-/* WELCOME SECTION (Desktop: Side-by-Side)                             */
+/* WELCOME SECTION — FIXED, CLEAN, MATCHED HEIGHT                      */
 /* =================================================================== */
+
 .welcome-section h2 {
   color: var(--white);
   font-size: 28px;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .welcome-container {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: stretch;     /* <<< Ensures equal-height columns */
   gap: 40px;
   flex-wrap: wrap;
 }
 
-/* Left Card */
+/* LEFT BOX — dark, low opacity, same height as image block */
 .welcome-card {
   flex: 1 1 420px;
-  background: var(--off-white);
-  color: var(--dark);
+  background: rgba(0, 0, 0, 0.25);   /* <<< lower opacity */
+  color: var(--white);
   padding: 30px;
   font-size: 18px;
   line-height: 1.7;
-  backdrop-filter: blur(6px);
+  border-radius: 0;
+  border: 1px solid #555;           /* <<< thin grey border */
+  display: flex;
+  align-items: center;              /* vertically center text */
 }
 
-/* Right Images */
+/* RIGHT IMAGES — TRUE side-by-side, fill 100% height */
 .welcome-images {
   flex: 1 1 420px;
   display: flex;
-  flex-direction: column;
   gap: 20px;
 }
 
 .welcome-images img {
-  width: 100%;
+  flex: 1;                          /* each takes 50% width naturally */
+  height: 300px;                     /* <<< lets image keep native height */
   border-radius: 0;
-  object-fit: cover;
-  filter: brightness(0.92);
-  transition: 0.2s;
+  border: 1px solid #555;           /* <<< thin grey border */
+  object-fit: cover;                /* <<< prevents distortion */
 }
 
-.welcome-images img:hover {
-  filter: brightness(1);
-}
 
 /* =================================================================== */
-/* WELCOME SECTION — MOBILE CLEANUP                                    */
+/* MOBILE                                                              */
 /* =================================================================== */
+
 @media (max-width: 800px) {
   .welcome-container {
-    display: block !important;  /* disable flex */
+    display: block !important;
   }
 
   .welcome-card,
   .welcome-images {
     width: 100% !important;
-    flex: none !important;
-    height: auto !important;
     margin-bottom: 20px !important;
+  }
+
+  .welcome-images {
+    flex-direction: column !important;
+  }
+
+  .welcome-images img {
+    width: 100% !important;
+    height: auto !important;
   }
 }
 
 @media (max-width: 600px) {
-  .welcome-section {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
   .welcome-card {
-    padding: 14px !important;
+    padding: 16px !important;
   }
 
   .welcome-card p {
@@ -262,6 +271,31 @@ nav {
     line-height: 1.45 !important;
   }
 }
+/* =================================================================== */
+/* QUOTE FORM — MATCH WELCOME PARAGRAPH STYLE                          */
+/* =================================================================== */
+
+#quote .card {
+  background: rgba(0, 0, 0, 0.25);    /* same dark, semi-opaque overlay */
+  color: var(--white);
+  padding: 30px;
+  border: 1px solid #555;            /* thin grey border */
+  border-radius: 0;
+  backdrop-filter: none;             /* remove blur */
+  box-shadow: none;                  /* ensure flat look */
+}
+/* CONTACT FORM — MATCH QUOTE FORM STYLE */
+#contact .card {
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--white);
+  padding: 30px;
+  border: 1px solid #555;
+  border-radius: 0;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+
 
 /* =================================================================== */
 /* FADE SLIDER                                                        */
