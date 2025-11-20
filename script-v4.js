@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ------------------------------------------------------------
-  // 6. CONTACT FORM HANDLER (Supabase Edge Function)
+  // 6. CONTACT FORM HANDLER (FIXED)
   // ------------------------------------------------------------
   document.getElementById("contactForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -179,26 +179,20 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-const res = await fetch(
-  "https://hrercslgttmmtbcjbgpz.supabase.co/functions/v1/contact-email",
-  {
-    method: "POST",
-    headers: {
-  "Content-Type": "application/json",
-  "Authorization": `Bearer ${SUPABASE_KEY}`
-},
-    body: JSON.stringify(payload)
-  }
-);
+      const { data, error } = await supabase.functions.invoke(
+        "contact-email",
+        { body: payload }
+      );
 
-
-      if (res.ok) {
-        alert("Message sent! Thank you.");
-        e.target.reset();
-      } else {
+      if (error) {
+        console.error("Contact form error:", error);
         alert("There was a problem sending your message.");
-        console.error("Contact form error:", await res.text());
+        return;
       }
+
+      alert("Message sent! Thank you.");
+      e.target.reset();
+
     } catch (err) {
       alert("Network error sending your message.");
       console.error("Contact form network error:", err);
