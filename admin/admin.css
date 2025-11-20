@@ -120,36 +120,49 @@ h2 {
 /* BUTTONS                                                             */
 /* =================================================================== */
 
-button {
-    background: rgba(35, 35, 35, 0.7);
-    color: var(--white);
-    border: 1px solid var(--light-grey);
-    padding: 12px 22px;
+/* ===================================== */
+/* UNIVERSAL ADMIN BUTTON STYLES         */
+/* Matches login page look everywhere    */
+/* ===================================== */
+
+button,
+.admin-btn {
+    background: #2c2c2c;      /* same as login */
+    color: #ffffff;
+    border: none;
+    padding: 12px 18px;
     font-size: 16px;
     font-weight: 500;
     border-radius: 4px;
     cursor: pointer;
+    width: 100%;
+    opacity: 0.95;
     transition: 0.2s ease;
 }
 
-button:hover {
-    background: rgba(35,35,35,0.9);
-    border-color: var(--white);
+button:hover,
+.admin-btn:hover {
+    background: #3a3a3a;
+    opacity: 1;
 }
 
-/* Red danger button */
+/* Red danger button (delete, remove, etc.) */
 .delete-btn {
-    background: var(--danger);
+    background: #b12929;
+    color: #ffffff;
     border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    color: var(--white);
+    padding: 10px 14px;
     font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.95;
 }
 
 .delete-btn:hover {
-    background: var(--danger-hover);
+    background: #d93a3a;
+    opacity: 1;
 }
+
 
 /* =================================================================== */
 /* INPUTS                                                              */
