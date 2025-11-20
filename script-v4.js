@@ -47,13 +47,12 @@ async function loadGarments() {
     return;
   }
 
-  const activeRows = data.filter(row => row.active === true);
-  const uniqueNames = [...new Set(activeRows.map(row => row.name))];
+  const activeRows = data.filter((row) => row.active === true);
+  const uniqueNames = [...new Set(activeRows.map((row) => row.name))];
 
-  dropdown.innerHTML =
-    uniqueNames
-      .map(name => `<option value="${name}">${name}</option>`)
-      .join("");
+  dropdown.innerHTML = uniqueNames
+    .map((name) => `<option value="${name}">${name}</option>`)
+    .join("");
 }
 
 // ------------------------------------------------------------
@@ -62,110 +61,124 @@ async function loadGarments() {
 document.addEventListener("DOMContentLoaded", () => {
   loadGarments();
 
-  document.getElementById("quoteForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+  document
+    .getElementById("quoteForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const status = document.getElementById("quoteStatus");
-    status.innerText = "Submitting… Please wait.";
+      const status = document.getElementById("quoteStatus");
+      status.innerText = "Submitting… Please wait.";
 
-    const name = document.getElementById("name").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const garment_type = document.getElementById("garment_type").value;
-    const quality = document.getElementById("quality").value;
-    const colors = parseInt(document.getElementById("colors").value);
-    const quantity = parseInt(document.getElementById("quantity").value);
-    const deadline = document.getElementById("deadline").value || null;
-    const instructions = document.getElementById("instructions").value.trim();
-    const artFile = document.getElementById("artfile").files[0] || null;
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const garment_type = document.getElementById("garment_type").value;
+      const quality = document.getElementById("quality").value;
+      const colors = parseInt(document.getElementById("colors").value);
+      const quantity = parseInt(document.getElementById("quantity").value);
+      const deadline = document.getElementById("deadline").value || null;
+      const instructions = document
+        .getElementById("instructions")
+        .value.trim();
+      const artFile =
+        document.getElementById("artfile").files[0] || null;
 
-    if (!name) { status.innerText = "❌ Please enter your full name."; return; }
-    if (!email) { status.innerText = "❌ Please enter an email address."; return; }
-
-    const insertPayload = {
-      name,
-      email,
-      phone,
-      garment_type,
-      quality,
-      colors,
-      quantity,
-      deadline,
-      instructions,
-      created_at: new Date().toISOString()
-    };
-
-    const { data: quoteRow, error: insertError } = await supabase
-      .from("quotes")
-      .insert(insertPayload)
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error("INSERT ERROR:", insertError);
-      status.innerText = "❌ Database error submitting your quote.";
-      return;
-    }
-
-    const quoteNumber = quoteRow.quote_number;
-    const nameSlug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-    const folderName = `${quoteNumber}_${nameSlug}`;
-
-    const placeholderBlob = new Blob(["keep"], { type: "text/plain" });
-    await supabase.storage
-      .from("quotes_bucket")
-      .upload(`${folderName}/.keep`, placeholderBlob, { upsert: true });
-
-    let stored_art_path = null;
-
-    if (artFile) {
-      const filePath = `${folderName}/${artFile.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("quotes_bucket")
-        .upload(filePath, artFile, { upsert: true });
-
-      if (uploadError) {
-        console.error("UPLOAD ERROR:", uploadError);
-        status.innerText = "❌ Error uploading artwork.";
+      if (!name) {
+        status.innerText = "❌ Please enter your full name.";
+        return;
+      }
+      if (!email) {
+        status.innerText = "❌ Please enter an email address.";
         return;
       }
 
-      stored_art_path = filePath;
-    }
+      const insertPayload = {
+        name,
+        email,
+        phone,
+        garment_type,
+        quality,
+        colors,
+        quantity,
+        deadline,
+        instructions,
+        created_at: new Date().toISOString(),
+      };
 
-    const formDataJSON = {
-      name,
-      email,
-      phone,
-      garment_type,
-      quality,
-      colors,
-      quantity,
-      deadline,
-      instructions,
-      created_at: insertPayload.created_at,
-      art_file: stored_art_path
-    };
+      const { data: quoteRow, error: insertError } = await supabase
+        .from("quotes")
+        .insert(insertPayload)
+        .select()
+        .single();
 
-    await supabase.storage
-      .from("quotes_bucket")
-      .upload(
+      if (insertError) {
+        console.error("INSERT ERROR:", insertError);
+        status.innerText = "❌ Database error submitting your quote.";
+        return;
+      }
+
+      const quoteNumber = quoteRow.quote_number;
+      const nameSlug = name
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
+      const folderName = `${quoteNumber}_${nameSlug}`;
+
+      const placeholderBlob = new Blob(["keep"], {
+        type: "text/plain",
+      });
+
+      await supabase.storage
+        .from("quotes_bucket")
+        .upload(`${folderName}/.keep`, placeholderBlob, {
+          upsert: true,
+        });
+
+      let stored_art_path = null;
+
+      if (artFile) {
+        const filePath = `${folderName}/${artFile.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("quotes_bucket")
+          .upload(filePath, artFile, { upsert: true });
+
+        if (uploadError) {
+          console.error("UPLOAD ERROR:", uploadError);
+          status.innerText = "❌ Error uploading artwork.";
+          return;
+        }
+
+        stored_art_path = filePath;
+      }
+
+      const formDataJSON = {
+        name,
+        email,
+        phone,
+        garment_type,
+        quality,
+        colors,
+        quantity,
+        deadline,
+        instructions,
+        created_at: insertPayload.created_at,
+        art_file: stored_art_path,
+      };
+
+      await supabase.storage.from("quotes_bucket").upload(
         `${folderName}/form.json`,
-        new Blob([JSON.stringify(formDataJSON, null, 2)], { type: "application/json" }),
+        new Blob([JSON.stringify(formDataJSON, null, 2)], {
+          type: "application/json",
+        }),
         { upsert: true }
       );
 
-    await supabase
-      .from("quotes")
-      .update({ art_url: stored_art_path })
-      .eq("id", quoteRow.id);
+      await supabase
+        .from("quotes")
+        .update({ art_url: stored_art_path })
+        .eq("id", quoteRow.id);
 
-    status.innerText = `✅ Quote #${quoteNumber} submitted successfully!`;
-    document.getElementById("quoteForm").reset();
-  });
-
-  // ------------------------------------------------------------
-  // ❌ CONTACT FORM: REMOVED COMPLETELY
-  // Netlify handles it automatically. No JS should touch it.
-  // ------------------------------------------------------------
+      status.innerText = `✅ Quote #${quoteNumber} submitted successfully!`;
+      document.getElementById("quoteForm").reset();
+    });
 });
