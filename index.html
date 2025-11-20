@@ -90,8 +90,8 @@
   <div class="card">
     <form id="quoteForm" autocomplete="off" enctype="multipart/form-data" onsubmit="return false;">
 
-<label>Your Full Name</label>
-<input type="text" id="name" name="name" required />
+      <label>Your Full Name</label>
+      <input type="text" id="name" name="name" required />
 
       <label>Email Address</label>
       <input type="email" id="email" name="email_address" required />
@@ -139,12 +139,18 @@
 <section id="contact">
     <h2>Contact Us</h2>
     <div class="card">
-        <form id="contactForm">
+
+        <!-- ✅ Netlify-powered form — no JS, no Supabase -->
+        <form name="contact" method="POST" data-netlify="true">
+            <input type="hidden" name="form-name" value="contact">
+
             <input type="text" name="name" placeholder="Your Name" required>
             <input type="email" name="email" placeholder="Your Email" required>
-            <textarea name="message" placeholder="Your Message"></textarea>
+            <textarea name="message" placeholder="Your Message" required></textarea>
+
             <button type="submit">Send Message</button>
         </form>
+
     </div>
 </section>
 
@@ -153,10 +159,6 @@
 
 <!-- Then your app logic -->
 <script src="script-v4.js?v=10001"></script>
-
-
-
-
 
 </body>
 </html>
