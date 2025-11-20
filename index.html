@@ -84,55 +84,23 @@
 </section>
 
 <!-- QUOTE FORM -->
-<section id="quote">
-  <h2>Get a Quick Quote</h2>
+<section id="contact">
+    <h2>Contact Us</h2>
 
-  <div class="card">
-    <form id="quoteForm" autocomplete="off" enctype="multipart/form-data" onsubmit="return false;">
+    <div class="card">
+        <form id="contactForm" onsubmit="return false;">
+            <label>Your Name</label>
+            <input type="text" name="name" required>
 
-      <label>Your Full Name</label>
-      <input type="text" id="name" name="name" required />
+            <label>Your Email</label>
+            <input type="email" name="email" required>
 
-      <label>Email Address</label>
-      <input type="email" id="email" name="email_address" required />
+            <label>Your Message</label>
+            <textarea name="message" required></textarea>
 
-      <label>Phone Number</label>
-      <input type="text" id="phone" name="phone_number" />
-
-      <label>Garment Type</label>
-      <select id="garment_type" name="garment_type_safe" required>
-        <option value="">Loading garment types...</option>
-      </select>
-
-      <label>Garment Quality</label>
-      <select id="quality" name="garment_quality_safe" required>
-        <option value="">Select quality...</option>
-        <option value="budget">Budget</option>
-        <option value="standard">Standard</option>
-        <option value="premium">Premium</option>
-      </select>
-
-      <label>Number of Print Colors</label>
-      <input type="number" id="colors" name="print_colors" required min="1" />
-
-      <label>Quantity Needed</label>
-      <input type="number" id="quantity" name="order_quantity" required min="1" />
-
-      <label>Deadline (Optional)</label>
-      <input type="date" id="deadline" name="due_date" />
-
-      <label>Special Instructions</label>
-      <textarea id="instructions" name="instructions_text"></textarea>
-
-      <label>Upload Artwork (Optional)</label>
-      <input type="file" id="artfile" name="artfile" accept="image/*,.pdf" />
-
-      <button type="submit">Submit Quote Request</button>
-
-    </form>
-
-    <p id="quoteStatus" style="margin-top:10px;"></p>
-  </div>
+            <button type="submit">Send Message</button>
+        </form>
+    </div>
 </section>
 
 <!-- CONTACT -->
