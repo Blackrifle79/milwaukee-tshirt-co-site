@@ -183,7 +183,10 @@ const res = await fetch(
   "https://hrercslgttmmtbcjbgpz.supabase.co/functions/v1/contact-email",
   {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+  "Content-Type": "application/json",
+  "Authorization": `Bearer ${SUPABASE_KEY}`
+},
     body: JSON.stringify(payload)
   }
 );

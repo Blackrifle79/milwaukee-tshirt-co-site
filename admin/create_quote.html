@@ -153,17 +153,35 @@ function calculatePrice() {
 --------------------------------------------------------- */
 async function generatePDF() {
     const { jsPDF } = window.jspdf;
-
     const doc = new jsPDF();
 
-    let name = document.getElementById("name").value;
-    let qty = document.getElementById("quantity").value;
-    let price = document.getElementById("quoted_price").value;
+    // Collect all fields
+    const form = {
+        name: document.getElementById("name").value || "",
+        email: document.getElementById("email").value || "",
+        phone: document.getElementById("phone").value || "",
+        garment_type: document.getElementById("garment_type").value || "",
+        quality: document.getElementById("quality").value || "",
+        colors: document.getElementById("colors").value || "",
+        quantity: document.getElementById("quantity").value || "",
+        deadline: document.getElementById("deadline").value || "",
+        instructions: document.getElementById("instructions").value || "",
+        quoted_price: document.getElementById("quoted_price").value || ""
+    };
 
-    doc.text(`Quote for ${name}`, 10, 10);
-    doc.text(`Quantity: ${qty}`, 10, 20);
-    doc.text(`Total Price: $${price}`, 10, 30);
+    // PDF TITLE
+    doc.setFontSize(18);
+    doc.text("Quote Summary", 10, 14);
 
+    doc.setFontSize(12);
+    let y = 30;
+
+    for (const [key, value] of Object.entries(form)) {
+        doc.text(`${key.replace(/_/g, " ")}: ${value}`, 10, y);
+        y += 8;
+    }
+
+    // Save to blob
     const pdfData = doc.output("blob");
 
     const params = new URLSearchParams(window.location.search);
@@ -171,15 +189,10 @@ async function generatePDF() {
 
     let filename = `${folder}/quote.pdf`;
 
-    /* ---------------------------------------------------------
-       FIXED: Proper PDF upload with contentType
-    --------------------------------------------------------- */
+    // Upload to Supabase
     const { error } = await window.client.storage
         .from("quotes_bucket")
-        .upload(filename, pdfData, {
-            upsert: true,
-            contentType: "application/pdf"
-        });
+        .upload(filename, pdfData, { upsert: true });
 
     if (error) {
         alert("Upload failed");
@@ -187,6 +200,7 @@ async function generatePDF() {
         return;
     }
 
+    // Make a signed link
     const { data: signed } = await window.client.storage
         .from("quotes_bucket")
         .createSignedUrl(filename, 3600);
@@ -194,6 +208,7 @@ async function generatePDF() {
     document.getElementById("pdfLink").innerHTML =
         `<a class="pdf-link" href="${signed.signedUrl}" target="_blank">View Quote PDF</a>`;
 }
+
 
 /* ---------------------------------------------------------
    HOOK UP BUTTONS
