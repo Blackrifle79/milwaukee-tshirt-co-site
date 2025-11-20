@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Generate Quote</title>
+
+    <!-- Global + Admin Styles -->
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/admin/admin.css">
+
+    <style>
+        .quote-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .pdf-link {
+            margin-top: 20px;
+            display: block;
+            color: #8fe3ff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page-container">
+
+    <h1>Create Quote</h1>
+
+    <div id="quoteForm" class="card">
+        <h2>Quote Details</h2>
+
+        <div class="quote-form-grid">
+            <div>
+                <label>Customer Name</label>
+                <input id="name" type="text">
+            </div>
+
+            <div>
+                <label>Email</label>
+                <input id="email" type="text">
+            </div>
+
+            <div>
+                <label>Phone</label>
+                <input id="phone" type="text">
+            </div>
+
+            <div>
+                <label>Garment Type</label>
+                <input id="garment_type" type="text">
+            </div>
+
+            <div>
+                <label>Quality</label>
+                <input id="quality" type="text">
+            </div>
+
+            <div>
+                <label>Colors</label>
+                <input id="colors" type="number">
+            </div>
+
+            <div>
+                <label>Quantity</label>
+                <input id="quantity" type="number">
+            </div>
+
+            <div>
+                <label>Deadline</label>
+                <input id="deadline" type="date">
+            </div>
+        </div>
+
+        <label>Special Instructions</label>
+        <textarea id="instructions"></textarea>
+
+        <label>Quoted Price</label>
+        <input id="quoted_price" type="number" step="0.01">
+
+        <button id="calcBtn">Calculate Price</button>
+        <button id="pdfBtn">Generate PDF</button>
+
+        <div id="pdfLink"></div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="/admin/js/supabase.js"></script>
+
+<script>
+/* ---------------------------------------------------------
+   LOAD TICKET INFO
+--------------------------------------------------------- */
+async function loadForm() {
+    while (!window.client) await new Promise(r => setTimeout(r, 10));
+
+    const params = new URLSearchParams(window.location.search);
+    const folder = params.get("folder");
+
+    if (!folder) {
+        alert("Missing folder");
+        return;
+    }
+
+    const { data: jsonFile } = await window.client.storage
+        .from("quotes_bucket")
+        .download(`${folder}/form.json`);
+
+    if (!jsonFile) return;
+
+    const text = await jsonFile.text();
+    const form = JSON.parse(text);
+
+    document.getElementById("name").value = form.name || "";
+    document.getElementById("email").value = form.email || "";
+    document.getElementById("phone").value = form.phone || "";
+    document.getElementById("garment_type").value = form.garment_type || "";
+    document.getElementById("quality").value = form.quality || "";
+    document.getElementById("colors").value = form.colors || 1;
+    document.getElementById("quantity").value = form.quantity || 1;
+    document.getElementById("deadline").value = form.deadline || "";
+    document.getElementById("instructions").value = form.instructions || "";
+}
+
+/* ---------------------------------------------------------
+   PRICE CALCULATION (simple placeholder)
+--------------------------------------------------------- */
+function calculatePrice() {
+    let qty = Number(document.getElementById("quantity").value);
+    let colors = Number(document.getElementById("colors").value);
+
+    // SIMPLE TEMP PRICING
+    let garmentCost = 3.50;
+    let colorCost = colors * 1.00;
+    let printCost = 0;
+
+    if (qty < 24) printCost = 2.50;
+    else if (qty < 72) printCost = 1.75;
+    else if (qty < 144) printCost = 1.25;
+    else printCost = 0.85;
+
+    let total = qty * (garmentCost + printCost + colorCost);
+
+    document.getElementById("quoted_price").value = total.toFixed(2);
+}
+
+/* ---------------------------------------------------------
+   PDF GENERATION (simple text PDF)
+--------------------------------------------------------- */
+async function generatePDF() {
+    const { jsPDF } = window.jspdf;
+
+    const doc = new jsPDF();
+
+    let name = document.getElementById("name").value;
+    let qty = document.getElementById("quantity").value;
+    let price = document.getElementById("quoted_price").value;
+
+    doc.text(`Quote for ${name}`, 10, 10);
+    doc.text(`Quantity: ${qty}`, 10, 20);
+    doc.text(`Total Price: $${price}`, 10, 30);
+
+    const pdfData = doc.output("blob");
+
+    const params = new URLSearchParams(window.location.search);
+    const folder = params.get("folder");
+
+    let filename = `${folder}/quote.pdf`;
+
+    const { error } = await window.client.storage
+        .from("quotes_bucket")
+        .upload(filename, pdfData, { upsert: true });
+
+    if (error) {
+        alert("Upload failed");
+        console.error(error);
+        return;
+    }
+
+    const { data: signed } = await window.client.storage
+        .from("quotes_bucket")
+        .createSignedUrl(filename, 3600);
+
+    document.getElementById("pdfLink").innerHTML =
+        `<a class="pdf-link" href="${signed.signedUrl}" target="_blank">View Quote PDF</a>`;
+}
+
+/* ---------------------------------------------------------
+   HOOK UP BUTTONS
+--------------------------------------------------------- */
+document.getElementById("calcBtn").addEventListener("click", calculatePrice);
+document.getElementById("pdfBtn").addEventListener("click", generatePDF);
+
+document.addEventListener("DOMContentLoaded", loadForm);
+</script>
+
+<!-- jsPDF CDN -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+</body>
+</html>

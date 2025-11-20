@@ -54,27 +54,27 @@
             font-weight: bold;
             color: #8fe3ff;
         }
-/* Force readable text inside the form card */
-#formData.card,
-#formData.card *,
-#formData .card,
-#formData .card * {
-    color: #e6e6e6 !important;
-}
 
-#formData.card .field-label,
-#formData .card .field-label {
-    color: #8fe3ff !important;
-    font-weight: bold;
-}
+        /* Improve readability inside formData card */
+        #formData.card,
+        #formData.card *,
+        #formData .card,
+        #formData .card * {
+            color: #e6e6e6 !important;
+        }
 
-
+        #formData.card .field-label,
+        #formData .card .field-label {
+            color: #8fe3ff !important;
+            font-weight: bold;
+        }
 
         .file-link {
             color: #ffd27f;
             text-decoration: none;
             font-size: 15px;
         }
+
         .file-link:hover {
             text-decoration: underline;
         }
@@ -88,11 +88,12 @@
             cursor: pointer;
             border-radius: 4px;
         }
+
         .delete-btn:hover {
             background: #d44752;
         }
 
-        /* Sticky action bar */
+        /* Bottom bar */
         .ticket-action-bar {
             position: fixed;
             bottom: 0;
@@ -118,6 +119,7 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
         .ticket-action-bar button:hover {
             background: white;
         }
@@ -138,12 +140,11 @@
 
 </div>
 
-<!-- Hidden file picker -->
 <input type="file" id="filePicker" style="display:none;" />
 
 <!-- Bottom Action Bar -->
 <div class="ticket-action-bar">
-    <button>Create Quote</button>
+    <button id="createQuoteBtn">Create Quote</button>
     <button>Request Payment</button>
     <button id="uploadBtn">Upload File</button>
 </div>
@@ -279,6 +280,21 @@ document.addEventListener("click", async (event) => {
     }
 
     await loadTicket();
+});
+
+/* ---------------------------------------------------------
+   CREATE QUOTE — redirect
+--------------------------------------------------------- */
+document.getElementById("createQuoteBtn").addEventListener("click", () => {
+    const params = new URLSearchParams(window.location.search);
+    const folder = params.get("folder");
+
+    if (!folder) {
+        alert("Missing folder.");
+        return;
+    }
+
+    window.location.href = `/admin/create_quote.html?folder=${folder}`;
 });
 
 document.addEventListener("DOMContentLoaded", loadTicket);
