@@ -10,7 +10,7 @@ async function login() {
     const password = document.getElementById("password").value.trim();
     const status = document.getElementById("login-status");
 
-    status.innerText = "Checking…";
+    status.innerText = ""; // no “checking”
 
     const { data, error } = await window.client.auth.signInWithPassword({
         email,
@@ -25,25 +25,3 @@ async function login() {
 
     window.location.href = "/admin/dashboard.html";
 }
-
-
-
-// ================================
-// AUTH GUARD
-// ================================
-async function verifyAuth() {
-    while (!window.client) {
-        await new Promise(r => setTimeout(r, 10));
-    }
-
-    const { data: { session } } = await window.client.auth.getSession();
-
-    const currentPage = window.location.pathname;
-
-    // Prevent infinite redirect loop on admin login page
-    if (!session && !currentPage.includes("login.html")) {
-        window.location.href = "login.html";
-    }
-}
-
-verifyAuth();

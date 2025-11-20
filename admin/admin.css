@@ -254,3 +254,8 @@ select {
 .dashboard-card {
     user-select: none;
 }
+.admin-logo {
+    width: 180px;
+    margin: 0 auto 20px;
+    display: block;
+}
